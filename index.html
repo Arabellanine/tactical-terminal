@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TACTICAL TERMINAL // ARABELLANINE</title>
+  <style>
+    :root {
+      --bg: #090a0f;
+      --panel-bg: rgba(16, 18, 27, 0.9);
+      --border-color: #2a2f42;
+      --border-bright: #ff3344;
+      --accent-red: #ff3344;
+      --accent-amber: #ffaa00;
+      --accent-cyan: #00f0ff;
+      --text-main: #d0d7de;
+      --text-dim: #606778;
+      --font-mono: "SF Mono", Monaco, Consolas, "Courier New", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.4;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      overflow-x: hidden;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--accent-red);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+    .brand-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .badge {
+      background: rgba(255, 51, 68, 0.2);
+      border: 1px solid var(--accent-red);
+      color: var(--accent-red);
+      padding: 2px 6px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .status-group {
+      display: flex;
+      gap: 12px;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+    .status-group span b { color: var(--accent-cyan); }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      flex: 1;
+    }
+    @media (max-width: 800px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 2px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .panel::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; width: 6px; height: 6px;
+      border-top: 2px solid var(--accent-red);
+      border-left: 2px solid var(--accent-red);
+    }
+    .panel-header {
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid var(--border-color);
+      padding: 8px 12px;
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      display: flex;
+      justify-content: space-between;
+      color: var(--accent-amber);
+    }
+    .panel-body {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+    textarea {
+      width: 100%;
+      background: #050608;
+      border: 1px solid var(--border-color);
+      color: var(--accent-cyan);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 10px;
+      resize: vertical;
+      min-height: 120px;
+      outline: none;
+    }
+    textarea:focus {
+      border-color: var(--accent-cyan);
+    }
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    button {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.15s ease;
+    }
+    button:hover {
+      background: var(--accent-red);
+      color: #fff;
+      border-color: var(--accent-red);
+    }
+    button.active {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+    .hex-dump {
+      background: #040507;
+      border: 1px solid var(--border-color);
+      padding: 10px;
+      font-size: 11px;
+      overflow-x: auto;
+      white-space: pre;
+      color: #99aab5;
+      max-height: 260px;
+      line-height: 1.5;
+    }
+    .hex-offset { color: var(--accent-amber); }
+    .hex-bytes { color: var(--text-main); }
+    .hex-ascii { color: var(--accent-cyan); }
+    .metrics-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 8px;
+      border: 1px solid var(--border-color);
+    }
+    .metric-cell {
+      display: flex;
+      flex-direction: column;
+      font-size: 10px;
+    }
+    .metric-cell .label { color: var(--text-dim); }
+    .metric-cell .val { font-size: 13px; font-weight: bold; color: #fff; }
+    footer {
+      margin-top: 16px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--accent-red); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand-title">
+      <span>TACTICAL TERMINAL // HEX & CIPHER INSPECTOR</span>
+      <span class="badge">SPEC V1.0</span>
+    </div>
+    <div class="status-group">
+      <span>RUNTIME: <b>ZERO-DEPENDENCY</b></span>
+      <span>STORAGE: <b>LOCAL-FIRST</b></span>
+      <span>ORGANIZATION: <b>ARABELLANINE</b></span>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- INPUT & PAYLOAD PANEL -->
+    <div class="panel">
+      <div class="panel-header">
+        <span>[01] INGESTION BUFFER & TRANSFORM</span>
+        <span id="byte-counter">0 BYTES</span>
+      </div>
+      <div class="panel-body">
+        <textarea id="raw-input" placeholder="PASTE ASCII, STRING PAYLOAD, OR ENCODED DATA STREAM HERE..."></textarea>
+        
+        <div class="btn-row">
+          <button onclick="applyTransform('rot13')">ROT-13</button>
+          <button onclick="applyTransform('base64-enc')">BASE64 ENC</button>
+          <button onclick="applyTransform('base64-dec')">BASE64 DEC</button>
+          <button onclick="applyTransform('url-enc')">URL ENC</button>
+          <button onclick="applyTransform('url-dec')">URL DEC</button>
+          <button onclick="applyTransform('reverse')">REVERSE</button>
+          <button onclick="applyTransform('clear')">CLEAR</button>
+        </div>
+
+        <div class="metrics-bar">
+          <div class="metric-cell">
+            <span class="label">CHAR COUNT</span>
+            <span class="val" id="m-chars">0</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">RAW BYTES (UTF-8)</span>
+            <span class="val" id="m-bytes">0</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">SHANNON ENTROPY</span>
+            <span class="val" id="m-entropy">0.00</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">BIT DENSITY</span>
+            <span class="val" id="m-density">0%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HEX DUMP & DISSECTION PANEL -->
+    <div class="panel">
+      <div class="panel-header">
+        <span>[02] HEXADECIMAL INSPECTOR DUMP</span>
+        <span>CANONICAL VIEW</span>
+      </div>
+      <div class="panel-body">
+        <div id="hex-view" class="hex-dump">// WAITING FOR DATA INGESTION...</div>
+        
+        <div class="btn-row">
+          <button onclick="copyOutput('hex')">COPY HEX</button>
+          <button onclick="copyOutput('c-array')">COPY C ARRAY</button>
+          <button onclick="generateSample()">LOAD TEST VECTOR</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>ARABELLANINE SECURE UTILITY // ZERO EXTERNAL NETWORK CALLS</span>
+    <span>DISPATCHED FROM THE DIGITALLY SEALED COCKPIT</span>
+  </footer>
+
+  <script>
+    const inputEl = document.getElementById('raw-input');
+    const hexView = document.getElementById('hex-view');
+    const mChars = document.getElementById('m-chars');
+    const mBytes = document.getElementById('m-bytes');
+    const mEntropy = document.getElementById('m-entropy');
+    const mDensity = document.getElementById('m-density');
+    const byteCounter = document.getElementById('byte-counter');
+
+    function update() {
+      const text = inputEl.value;
+      const encoder = new TextEncoder();
+      const bytes = encoder.encode(text);
+
+      mChars.textContent = text.length;
+      mBytes.textContent = bytes.length;
+      byteCounter.textContent = bytes.length + ' BYTES';
+
+      // Calculate Shannon Entropy
+      if (bytes.length === 0) {
+        mEntropy.textContent = '0.00';
+        mDensity.textContent = '0%';
+        hexView.textContent = '// WAITING FOR DATA INGESTION...';
+        return;
+      }
+
+      const freq = {};
+      let ones = 0;
+      for (let i = 0; i < bytes.length; i++) {
+        const b = bytes[i];
+        freq[b] = (freq[b] || 0) + 1;
+        // count bits
+        for (let bit = 0; bit < 8; bit++) {
+          if ((b >> bit) & 1) ones++;
+        }
+      }
+
+      let entropy = 0;
+      for (const k in freq) {
+        const p = freq[k] / bytes.length;
+        entropy -= p * Math.log2(p);
+      }
+      mEntropy.textContent = entropy.toFixed(2);
+      mDensity.textContent = ((ones / (bytes.length * 8)) * 100).toFixed(1) + '%';
+
+      // Render Hex Dump
+      let dump = '';
+      for (let i = 0; i < bytes.length; i += 16) {
+        const chunk = bytes.slice(i, i + 16);
+        const offset = i.toString(16).padStart(6, '0').toUpperCase();
+        
+        let hexPart = '';
+        let asciiPart = '';
+        for (let j = 0; j < 16; j++) {
+          if (j < chunk.length) {
+            hexPart += chunk[j].toString(16).padStart(2, '0').toUpperCase() + ' ';
+            const c = chunk[j];
+            asciiPart += (c >= 32 && c <= 126) ? String.fromCharCode(c) : '.';
+          } else {
+            hexPart += '   ';
+          }
+          if (j === 7) hexPart += ' ';
+        }
+
+        dump += `${offset}  ${hexPart} |${asciiPart}|\n`;
+      }
+      hexView.textContent = dump;
+    }
+
+    function applyTransform(type) {
+      const text = inputEl.value;
+      switch (type) {
+        case 'rot13':
+          inputEl.value = text.replace(/[a-zA-Z]/g, c => {
+            const base = c <= 'Z' ? 65 : 97;
+            return String.fromCharCode(((c.charCodeAt(0) - base + 13) % 26) + base);
+          });
+          break;
+        case 'base64-enc':
+          try { inputEl.value = btoa(unescape(encodeURIComponent(text))); } catch(e) {}
+          break;
+        case 'base64-dec':
+          try { inputEl.value = decodeURIComponent(escape(atob(text))); } catch(e) {}
+          break;
+        case 'url-enc':
+          inputEl.value = encodeURIComponent(text);
+          break;
+        case 'url-dec':
+          try { inputEl.value = decodeURI(text); } catch(e) {}
+          break;
+        case 'reverse':
+          inputEl.value = text.split('').reverse().join('');
+          break;
+        case 'clear':
+          inputEl.value = '';
+          break;
+      }
+      update();
+    }
+
+    function generateSample() {
+      inputEl.value = 'ARABELLANINE TACTICAL PROTOCOL V1.0\n[SEALED CORE: ASTRAL_LINK_ESTABLISHED]\nEntropy injection vector: 0xDEADBEEF 0xCAFEBABE\nSTATUS: ONLINE';
+      update();
+    }
+
+    function copyOutput(format) {
+      const encoder = new TextEncoder();
+      const bytes = encoder.encode(inputEl.value);
+      if (format === 'hex') {
+        const hex = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(' ');
+        navigator.clipboard.writeText(hex);
+      } else if (format === 'c-array') {
+        const c = 'const uint8_t data[] = { ' + Array.from(bytes).map(b => '0x' + b.toString(16).padStart(2, '0')).join(', ') + ' };';
+        navigator.clipboard.writeText(c);
+      }
+    }
+
+    inputEl.addEventListener('input', update);
+    generateSample();
+  </script>
+</body>
+</html>
