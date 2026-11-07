@@ -13,6 +13,7 @@
       --accent-red: #ff3344;
       --accent-amber: #ffaa00;
       --accent-cyan: #00f0ff;
+      --accent-green: #00ff66;
       --text-main: #d0d7de;
       --text-dim: #606778;
       --font-mono: "SF Mono", Monaco, Consolas, "Courier New", monospace;
@@ -37,6 +38,8 @@
       border-bottom: 2px solid var(--accent-red);
       padding-bottom: 12px;
       margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
     }
     .brand-title {
       font-size: 16px;
@@ -56,6 +59,25 @@
       text-transform: uppercase;
       letter-spacing: 1px;
     }
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+    }
+    .nav-tab {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      color: var(--text-dim);
+      padding: 6px 12px;
+      font-size: 11px;
+      cursor: pointer;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+    .nav-tab.active {
+      background: rgba(255, 51, 68, 0.15);
+      border-color: var(--accent-red);
+      color: #fff;
+    }
     .status-group {
       display: flex;
       gap: 12px;
@@ -69,7 +91,7 @@
       gap: 16px;
       flex: 1;
     }
-    @media (max-width: 800px) {
+    @media (max-width: 900px) {
       .grid { grid-template-columns: 1fr; }
     }
     .panel {
@@ -155,12 +177,9 @@
       overflow-x: auto;
       white-space: pre;
       color: #99aab5;
-      max-height: 260px;
+      max-height: 320px;
       line-height: 1.5;
     }
-    .hex-offset { color: var(--accent-amber); }
-    .hex-bytes { color: var(--text-main); }
-    .hex-ascii { color: var(--accent-cyan); }
     .metrics-bar {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -176,6 +195,71 @@
     }
     .metric-cell .label { color: var(--text-dim); }
     .metric-cell .val { font-size: 13px; font-weight: bold; color: #fff; }
+    
+    /* MODULE 02 SPECIFIC STYLES */
+    .checksum-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      background: #050608;
+      border: 1px solid var(--border-color);
+      padding: 10px;
+    }
+    .checksum-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .checksum-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+    .checksum-header span.alg {
+      color: var(--accent-amber);
+      font-weight: bold;
+    }
+    .checksum-val {
+      font-size: 11px;
+      color: var(--accent-cyan);
+      word-break: break-all;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 4px 6px;
+      border: 1px dashed #1e2230;
+      user-select: all;
+    }
+    .codec-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .codec-box {
+      background: #050608;
+      border: 1px solid var(--border-color);
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .codec-label {
+      font-size: 10px;
+      color: var(--text-dim);
+      display: flex;
+      justify-content: space-between;
+    }
+    .codec-label span.tag { color: var(--accent-green); }
+    .codec-output {
+      font-size: 11px;
+      color: #d0d7de;
+      height: 70px;
+      overflow-y: auto;
+      word-break: break-all;
+      white-space: pre-wrap;
+      background: rgba(0,0,0,0.4);
+      padding: 4px;
+    }
+
     footer {
       margin-top: 16px;
       padding-top: 10px;
@@ -191,58 +275,61 @@
 <body>
   <header>
     <div class="brand-title">
-      <span>TACTICAL TERMINAL // HEX & CIPHER INSPECTOR</span>
-      <span class="badge">SPEC V1.0</span>
+      <span>TACTICAL TERMINAL</span>
+      <span class="badge">SPEC V2.0 // MULTI-MODULE</span>
+    </div>
+    <div class="nav-tabs">
+      <div class="nav-tab" id="tab-btn-m1" onclick="switchModule(1)">[MOD 01] HEX & CANONICAL</div>
+      <div class="nav-tab active" id="tab-btn-m2" onclick="switchModule(2)">[MOD 02] PAYLOAD & HASH INSPECTOR</div>
     </div>
     <div class="status-group">
       <span>RUNTIME: <b>ZERO-DEPENDENCY</b></span>
-      <span>STORAGE: <b>LOCAL-FIRST</b></span>
-      <span>ORGANIZATION: <b>ARABELLANINE</b></span>
+      <span>CRYPTO: <b>WEB CRYPTO API</b></span>
+      <span>FLEET: <b>ARABELLANINE</b></span>
     </div>
   </header>
 
-  <div class="grid">
-    <!-- INPUT & PAYLOAD PANEL -->
+  <!-- MODULE 01: HEX & CANONICAL -->
+  <div class="grid" id="module-1-view" style="display: none;">
     <div class="panel">
       <div class="panel-header">
         <span>[01] INGESTION BUFFER & TRANSFORM</span>
-        <span id="byte-counter">0 BYTES</span>
+        <span id="byte-counter-m1">0 BYTES</span>
       </div>
       <div class="panel-body">
-        <textarea id="raw-input" placeholder="PASTE ASCII, STRING PAYLOAD, OR ENCODED DATA STREAM HERE..."></textarea>
+        <textarea id="raw-input-m1" placeholder="PASTE ASCII, STRING PAYLOAD, OR ENCODED DATA STREAM HERE..."></textarea>
         
         <div class="btn-row">
-          <button onclick="applyTransform('rot13')">ROT-13</button>
-          <button onclick="applyTransform('base64-enc')">BASE64 ENC</button>
-          <button onclick="applyTransform('base64-dec')">BASE64 DEC</button>
-          <button onclick="applyTransform('url-enc')">URL ENC</button>
-          <button onclick="applyTransform('url-dec')">URL DEC</button>
-          <button onclick="applyTransform('reverse')">REVERSE</button>
-          <button onclick="applyTransform('clear')">CLEAR</button>
+          <button onclick="applyTransformM1('rot13')">ROT-13</button>
+          <button onclick="applyTransformM1('base64-enc')">BASE64 ENC</button>
+          <button onclick="applyTransformM1('base64-dec')">BASE64 DEC</button>
+          <button onclick="applyTransformM1('url-enc')">URL ENC</button>
+          <button onclick="applyTransformM1('url-dec')">URL DEC</button>
+          <button onclick="applyTransformM1('reverse')">REVERSE</button>
+          <button onclick="applyTransformM1('clear')">CLEAR</button>
         </div>
 
         <div class="metrics-bar">
           <div class="metric-cell">
             <span class="label">CHAR COUNT</span>
-            <span class="val" id="m-chars">0</span>
+            <span class="val" id="m1-chars">0</span>
           </div>
           <div class="metric-cell">
-            <span class="label">RAW BYTES (UTF-8)</span>
-            <span class="val" id="m-bytes">0</span>
+            <span class="label">RAW BYTES</span>
+            <span class="val" id="m1-bytes">0</span>
           </div>
           <div class="metric-cell">
             <span class="label">SHANNON ENTROPY</span>
-            <span class="val" id="m-entropy">0.00</span>
+            <span class="val" id="m1-entropy">0.00</span>
           </div>
           <div class="metric-cell">
             <span class="label">BIT DENSITY</span>
-            <span class="val" id="m-density">0%</span>
+            <span class="val" id="m1-density">0%</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- HEX DUMP & DISSECTION PANEL -->
     <div class="panel">
       <div class="panel-header">
         <span>[02] HEXADECIMAL INSPECTOR DUMP</span>
@@ -252,41 +339,160 @@
         <div id="hex-view" class="hex-dump">// WAITING FOR DATA INGESTION...</div>
         
         <div class="btn-row">
-          <button onclick="copyOutput('hex')">COPY HEX</button>
-          <button onclick="copyOutput('c-array')">COPY C ARRAY</button>
-          <button onclick="generateSample()">LOAD TEST VECTOR</button>
+          <button onclick="copyOutputM1('hex')">COPY HEX</button>
+          <button onclick="copyOutputM1('c-array')">COPY C ARRAY</button>
+          <button onclick="generateSampleM1()">LOAD TEST VECTOR</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 02: PAYLOAD ENCODER & HASH/CHECKSUM INSPECTOR -->
+  <div class="grid" id="module-2-view">
+    <div class="panel">
+      <div class="panel-header">
+        <span>[02A] PAYLOAD BUFFER & ENCODING MATRIX</span>
+        <span id="byte-counter-m2">0 BYTES</span>
+      </div>
+      <div class="panel-body">
+        <textarea id="raw-input-m2" placeholder="INGEST PAYLOAD STREAM (ASCII / UTF-8 / JSON / TOKENS)..."></textarea>
+        
+        <div class="btn-row">
+          <button onclick="generateSampleM2()">LOAD PAYLOAD VECTOR</button>
+          <button onclick="clearM2()">PURGE BUFFER</button>
+          <button onclick="syncToModule1()">INSPECT IN HEX [M1]</button>
+        </div>
+
+        <div class="codec-grid">
+          <div class="codec-box">
+            <div class="codec-label">
+              <span>BASE64 (RFC 4648)</span>
+              <span class="tag" style="cursor:pointer" onclick="copyCodec('b64')">[COPY]</span>
+            </div>
+            <div id="out-b64" class="codec-output">--</div>
+          </div>
+          <div class="codec-box">
+            <div class="codec-label">
+              <span>BASE64URL (SAFE)</span>
+              <span class="tag" style="cursor:pointer" onclick="copyCodec('b64url')">[COPY]</span>
+            </div>
+            <div id="out-b64url" class="codec-output">--</div>
+          </div>
+          <div class="codec-box">
+            <div class="codec-label">
+              <span>URL ENCODED (COMPONENT)</span>
+              <span class="tag" style="cursor:pointer" onclick="copyCodec('url')">[COPY]</span>
+            </div>
+            <div id="out-url" class="codec-output">--</div>
+          </div>
+          <div class="codec-box">
+            <div class="codec-label">
+              <span>BINARY BITSTREAM</span>
+              <span class="tag" style="cursor:pointer" onclick="copyCodec('bin')">[COPY]</span>
+            </div>
+            <div id="out-bin" class="codec-output">--</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span>[02B] HARDWARE CRYPTOGRAPHIC CHECKSUMS</span>
+        <span>WEB CRYPTO ENGINE</span>
+      </div>
+      <div class="panel-body">
+        <div class="checksum-grid">
+          <div class="checksum-row">
+            <div class="checksum-header">
+              <span class="alg">SHA-256 (SECURE HASH 256)</span>
+              <span style="cursor:pointer;color:var(--accent-red)" onclick="copyHash('sha256')">[COPY]</span>
+            </div>
+            <div id="hash-sha256" class="checksum-val">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</div>
+          </div>
+
+          <div class="checksum-row">
+            <div class="checksum-header">
+              <span class="alg">SHA-512 (HIGH STRENGTH DIGEST)</span>
+              <span style="cursor:pointer;color:var(--accent-red)" onclick="copyHash('sha512')">[COPY]</span>
+            </div>
+            <div id="hash-sha512" class="checksum-val">cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e</div>
+          </div>
+
+          <div class="checksum-row">
+            <div class="checksum-header">
+              <span class="alg">SHA-1 (LEGACY DIGEST)</span>
+              <span style="cursor:pointer;color:var(--accent-red)" onclick="copyHash('sha1')">[COPY]</span>
+            </div>
+            <div id="hash-sha1" class="checksum-val">da39a3ee5e6b4b0d3255bfef95601890afd80709</div>
+          </div>
+
+          <div class="checksum-row">
+            <div class="checksum-header">
+              <span class="alg">CRC32 (ETHERNET / ZIP POLYNOMIAL)</span>
+              <span style="cursor:pointer;color:var(--accent-red)" onclick="copyHash('crc32')">[COPY]</span>
+            </div>
+            <div id="hash-crc32" class="checksum-val">00000000</div>
+          </div>
+        </div>
+
+        <div class="metrics-bar" style="margin-top:auto;">
+          <div class="metric-cell">
+            <span class="label">INGEST BYTES</span>
+            <span class="val" id="m2-bytes">0</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">DIGEST ENGINE</span>
+            <span class="val" style="color:var(--accent-green)">NATIVE</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">ZERO NETWORK</span>
+            <span class="val" style="color:var(--accent-cyan)">SEALED</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">STATUS</span>
+            <span class="val" id="m2-status">READY</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <footer>
-    <span>ARABELLANINE SECURE UTILITY // ZERO EXTERNAL NETWORK CALLS</span>
+    <span>ARABELLANINE SECURE UTILITY // ZERO EXTERNAL NETWORK CALLS // SUITE V2.0</span>
     <span>DISPATCHED FROM THE DIGITALLY SEALED COCKPIT</span>
   </footer>
 
   <script>
-    const inputEl = document.getElementById('raw-input');
-    const hexView = document.getElementById('hex-view');
-    const mChars = document.getElementById('m-chars');
-    const mBytes = document.getElementById('m-bytes');
-    const mEntropy = document.getElementById('m-entropy');
-    const mDensity = document.getElementById('m-density');
-    const byteCounter = document.getElementById('byte-counter');
+    // Navigation
+    function switchModule(mod) {
+      document.getElementById('module-1-view').style.display = (mod === 1) ? 'grid' : 'none';
+      document.getElementById('module-2-view').style.display = (mod === 2) ? 'grid' : 'none';
+      document.getElementById('tab-btn-m1').className = (mod === 1) ? 'nav-tab active' : 'nav-tab';
+      document.getElementById('tab-btn-m2').className = (mod === 2) ? 'nav-tab active' : 'nav-tab';
+    }
 
-    function update() {
-      const text = inputEl.value;
+    // --- MODULE 01 LOGIC ---
+    const inputElM1 = document.getElementById('raw-input-m1');
+    const hexView = document.getElementById('hex-view');
+    const m1Chars = document.getElementById('m1-chars');
+    const m1Bytes = document.getElementById('m1-bytes');
+    const m1Entropy = document.getElementById('m1-entropy');
+    const m1Density = document.getElementById('m1-density');
+    const byteCounterM1 = document.getElementById('byte-counter-m1');
+
+    function updateM1() {
+      const text = inputElM1.value;
       const encoder = new TextEncoder();
       const bytes = encoder.encode(text);
 
-      mChars.textContent = text.length;
-      mBytes.textContent = bytes.length;
-      byteCounter.textContent = bytes.length + ' BYTES';
+      m1Chars.textContent = text.length;
+      m1Bytes.textContent = bytes.length;
+      byteCounterM1.textContent = bytes.length + ' BYTES';
 
-      // Calculate Shannon Entropy
       if (bytes.length === 0) {
-        mEntropy.textContent = '0.00';
-        mDensity.textContent = '0%';
+        m1Entropy.textContent = '0.00';
+        m1Density.textContent = '0%';
         hexView.textContent = '// WAITING FOR DATA INGESTION...';
         return;
       }
@@ -296,7 +502,6 @@
       for (let i = 0; i < bytes.length; i++) {
         const b = bytes[i];
         freq[b] = (freq[b] || 0) + 1;
-        // count bits
         for (let bit = 0; bit < 8; bit++) {
           if ((b >> bit) & 1) ones++;
         }
@@ -307,15 +512,13 @@
         const p = freq[k] / bytes.length;
         entropy -= p * Math.log2(p);
       }
-      mEntropy.textContent = entropy.toFixed(2);
-      mDensity.textContent = ((ones / (bytes.length * 8)) * 100).toFixed(1) + '%';
+      m1Entropy.textContent = entropy.toFixed(2);
+      m1Density.textContent = ((ones / (bytes.length * 8)) * 100).toFixed(1) + '%';
 
-      // Render Hex Dump
       let dump = '';
       for (let i = 0; i < bytes.length; i += 16) {
         const chunk = bytes.slice(i, i + 16);
         const offset = i.toString(16).padStart(6, '0').toUpperCase();
-        
         let hexPart = '';
         let asciiPart = '';
         for (let j = 0; j < 16; j++) {
@@ -328,51 +531,50 @@
           }
           if (j === 7) hexPart += ' ';
         }
-
         dump += `${offset}  ${hexPart} |${asciiPart}|\n`;
       }
       hexView.textContent = dump;
     }
 
-    function applyTransform(type) {
-      const text = inputEl.value;
+    function applyTransformM1(type) {
+      const text = inputElM1.value;
       switch (type) {
         case 'rot13':
-          inputEl.value = text.replace(/[a-zA-Z]/g, c => {
+          inputElM1.value = text.replace(/[a-zA-Z]/g, c => {
             const base = c <= 'Z' ? 65 : 97;
             return String.fromCharCode(((c.charCodeAt(0) - base + 13) % 26) + base);
           });
           break;
         case 'base64-enc':
-          try { inputEl.value = btoa(unescape(encodeURIComponent(text))); } catch(e) {}
+          try { inputElM1.value = btoa(unescape(encodeURIComponent(text))); } catch(e) {}
           break;
         case 'base64-dec':
-          try { inputEl.value = decodeURIComponent(escape(atob(text))); } catch(e) {}
+          try { inputElM1.value = decodeURIComponent(escape(atob(text))); } catch(e) {}
           break;
         case 'url-enc':
-          inputEl.value = encodeURIComponent(text);
+          inputElM1.value = encodeURIComponent(text);
           break;
         case 'url-dec':
-          try { inputEl.value = decodeURI(text); } catch(e) {}
+          try { inputElM1.value = decodeURI(text); } catch(e) {}
           break;
         case 'reverse':
-          inputEl.value = text.split('').reverse().join('');
+          inputElM1.value = text.split('').reverse().join('');
           break;
         case 'clear':
-          inputEl.value = '';
+          inputElM1.value = '';
           break;
       }
-      update();
+      updateM1();
     }
 
-    function generateSample() {
-      inputEl.value = 'ARABELLANINE TACTICAL PROTOCOL V1.0\n[SEALED CORE: ASTRAL_LINK_ESTABLISHED]\nEntropy injection vector: 0xDEADBEEF 0xCAFEBABE\nSTATUS: ONLINE';
-      update();
+    function generateSampleM1() {
+      inputElM1.value = 'ARABELLANINE TACTICAL PROTOCOL V1.0\n[SEALED CORE: ASTRAL_LINK_ESTABLISHED]\nEntropy injection vector: 0xDEADBEEF 0xCAFEBABE\nSTATUS: ONLINE';
+      updateM1();
     }
 
-    function copyOutput(format) {
+    function copyOutputM1(format) {
       const encoder = new TextEncoder();
-      const bytes = encoder.encode(inputEl.value);
+      const bytes = encoder.encode(inputElM1.value);
       if (format === 'hex') {
         const hex = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(' ');
         navigator.clipboard.writeText(hex);
@@ -382,8 +584,136 @@
       }
     }
 
-    inputEl.addEventListener('input', update);
-    generateSample();
+    inputElM1.addEventListener('input', updateM1);
+
+    // --- MODULE 02 LOGIC ---
+    const inputElM2 = document.getElementById('raw-input-m2');
+    const byteCounterM2 = document.getElementById('byte-counter-m2');
+    const m2Bytes = document.getElementById('m2-bytes');
+    const outB64 = document.getElementById('out-b64');
+    const outB64Url = document.getElementById('out-b64url');
+    const outUrl = document.getElementById('out-url');
+    const outBin = document.getElementById('out-bin');
+    const hashSha256 = document.getElementById('hash-sha256');
+    const hashSha512 = document.getElementById('hash-sha512');
+    const hashSha1 = document.getElementById('hash-sha1');
+    const hashCrc32 = document.getElementById('hash-crc32');
+
+    // CRC32 Lookup Table
+    const crcTable = (function() {
+      let c;
+      const table = [];
+      for (let n = 0; n < 256; n++) {
+        c = n;
+        for (let k = 0; k < 8; k++) {
+          c = ((c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1));
+        }
+        table[n] = c;
+      }
+      return table;
+    })();
+
+    function calculateCrc32(bytes) {
+      let crc = 0 ^ (-1);
+      for (let i = 0; i < bytes.length; i++) {
+        crc = (crc >>> 8) ^ crcTable[(crc ^ bytes[i]) & 0xFF];
+      }
+      return ((crc ^ (-1)) >>> 0).toString(16).padStart(8, '0').toUpperCase();
+    }
+
+    async function hashBuffer(algorithm, bytes) {
+      const hashBuffer = await crypto.subtle.digest(algorithm, bytes);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function updateM2() {
+      const text = inputElM2.value;
+      const encoder = new TextEncoder();
+      const bytes = encoder.encode(text);
+
+      byteCounterM2.textContent = bytes.length + ' BYTES';
+      m2Bytes.textContent = bytes.length;
+
+      if (bytes.length === 0) {
+        outB64.textContent = '--';
+        outB64Url.textContent = '--';
+        outUrl.textContent = '--';
+        outBin.textContent = '--';
+        hashSha256.textContent = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+        hashSha512.textContent = 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e';
+        hashSha1.textContent = 'da39a3ee5e6b4b0d3255bfef95601890afd80709';
+        hashCrc32.textContent = '00000000';
+        return;
+      }
+
+      // Base64 & Safe
+      try {
+        const b64 = btoa(unescape(encodeURIComponent(text)));
+        outB64.textContent = b64;
+        outB64Url.textContent = b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      } catch (e) {
+        outB64.textContent = 'ERR: ENCODING_FAILED';
+        outB64Url.textContent = 'ERR: ENCODING_FAILED';
+      }
+
+      // URL
+      outUrl.textContent = encodeURIComponent(text);
+
+      // Binary stream
+      let binStr = '';
+      for (let i = 0; i < Math.min(bytes.length, 64); i++) {
+        binStr += bytes[i].toString(2).padStart(8, '0') + ' ';
+      }
+      if (bytes.length > 64) binStr += '... [TRUNCATED]';
+      outBin.textContent = binStr;
+
+      // Hashes via Web Crypto
+      hashSha256.textContent = await hashBuffer('SHA-256', bytes);
+      hashSha512.textContent = await hashBuffer('SHA-512', bytes);
+      hashSha1.textContent = await hashBuffer('SHA-1', bytes);
+      hashCrc32.textContent = calculateCrc32(bytes);
+    }
+
+    function generateSampleM2() {
+      inputElM2.value = 'ARABELLA_TACTICAL_TOKEN_SIG::ed25519::nonce_992182049::payload_auth_ok';
+      updateM2();
+    }
+
+    function clearM2() {
+      inputElM2.value = '';
+      updateM2();
+    }
+
+    function syncToModule1() {
+      inputElM1.value = inputElM2.value;
+      updateM1();
+      switchModule(1);
+    }
+
+    function copyCodec(type) {
+      let target = '';
+      if (type === 'b64') target = outB64.textContent;
+      if (type === 'b64url') target = outB64Url.textContent;
+      if (type === 'url') target = outUrl.textContent;
+      if (type === 'bin') target = outBin.textContent;
+      if (target && target !== '--') navigator.clipboard.writeText(target);
+    }
+
+    function copyHash(type) {
+      let target = '';
+      if (type === 'sha256') target = hashSha256.textContent;
+      if (type === 'sha512') target = hashSha512.textContent;
+      if (type === 'sha1') target = hashSha1.textContent;
+      if (type === 'crc32') target = hashCrc32.textContent;
+      if (target) navigator.clipboard.writeText(target);
+    }
+
+    inputElM2.addEventListener('input', updateM2);
+
+    // Initial setup
+    generateSampleM1();
+    generateSampleM2();
   </script>
 </body>
 </html>
