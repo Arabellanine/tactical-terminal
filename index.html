@@ -62,6 +62,7 @@
     .nav-tabs {
       display: flex;
       gap: 8px;
+      flex-wrap: wrap;
     }
     .nav-tab {
       background: rgba(255, 255, 255, 0.03);
@@ -83,6 +84,7 @@
       gap: 12px;
       font-size: 11px;
       color: var(--text-dim);
+      flex-wrap: wrap;
     }
     .status-group span b { color: var(--accent-cyan); }
     .grid {
@@ -345,6 +347,34 @@
     .lap-item span.idx { color: var(--accent-amber); }
     .lap-item span.time { color: var(--accent-cyan); }
 
+    /* MODULE 04 SPECIFIC STYLES */
+    .entropy-bar-wrap {
+      width: 100%;
+      height: 8px;
+      background: #050608;
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .entropy-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent-green);
+      transition: width 0.2s ease, background 0.2s ease;
+    }
+    .token-display-box {
+      background: #050608;
+      border: 1px solid var(--border-color);
+      padding: 10px;
+      font-size: 12px;
+      color: var(--accent-cyan);
+      word-break: break-all;
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      user-select: all;
+    }
+
     footer {
       margin-top: 16px;
       padding-top: 10px;
@@ -361,16 +391,17 @@
   <header>
     <div class="brand-title">
       <span>TACTICAL TERMINAL</span>
-      <span class="badge">SPEC V3.0 // MULTI-MODULE</span>
+      <span class="badge">SPEC V4.0 // SECURE PROTOCOLS</span>
     </div>
     <div class="nav-tabs">
       <div class="nav-tab" id="tab-btn-m1" onclick="switchModule(1)">[MOD 01] HEX & CANONICAL</div>
       <div class="nav-tab" id="tab-btn-m2" onclick="switchModule(2)">[MOD 02] PAYLOAD & HASH INSPECTOR</div>
-      <div class="nav-tab active" id="tab-btn-m3" onclick="switchModule(3)">[MOD 03] CHRONO & AUDIO PULSE</div>
+      <div class="nav-tab" id="tab-btn-m3" onclick="switchModule(3)">[MOD 03] CHRONO & AUDIO PULSE</div>
+      <div class="nav-tab active" id="tab-btn-m4" onclick="switchModule(4)">[MOD 04] ENTROPY & TOKENS</div>
     </div>
     <div class="status-group">
       <span>RUNTIME: <b>ZERO-DEPENDENCY</b></span>
-      <span>AUDIO: <b>WEB AUDIO API</b></span>
+      <span>CRYPTO: <b>WEB CRYPTO API</b></span>
       <span>FLEET: <b>ARABELLANINE</b></span>
     </div>
   </header>
@@ -545,7 +576,7 @@
   </div>
 
   <!-- MODULE 03: TACTICAL CHRONOMETER & AUDIO PULSE GENERATOR -->
-  <div class="grid" id="module-3-view">
+  <div class="grid" id="module-3-view" style="display: none;">
     <div class="panel">
       <div class="panel-header">
         <span>[03A] HIGH-PRECISION TACTICAL CHRONOMETER</span>
@@ -638,8 +669,102 @@
     </div>
   </div>
 
+  <!-- MODULE 04: TACTICAL ENTROPY & SECURE TOKEN GENERATOR -->
+  <div class="grid" id="module-4-view">
+    <div class="panel">
+      <div class="panel-header">
+        <span>[04A] HARDWARE CSPRNG TOKEN FORGE</span>
+        <span style="color:var(--accent-green)">CSPRNG ONLINE</span>
+      </div>
+      <div class="panel-body">
+        <div class="pulse-control-grid">
+          <div class="ctrl-group">
+            <label>TOKEN BYTE LENGTH <span class="val" id="val-token-len">32 BYTES (256-BIT)</span></label>
+            <input type="range" id="token-bytes-slider" min="8" max="128" step="8" value="32" oninput="updateTokenLength()">
+          </div>
+          <div class="ctrl-group">
+            <label>OUTPUT FORMAT</label>
+            <select id="token-format-select" onchange="generateTokens()">
+              <option value="hex">HEXADECIMAL (LOWERCASE)</option>
+              <option value="hex-upper">HEXADECIMAL (UPPERCASE)</option>
+              <option value="base64">BASE64 (STANDARD)</option>
+              <option value="base64url">BASE64URL (URL SAFE)</option>
+              <option value="alphanumeric">ALPHANUMERIC (TACTICAL KEY)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button onclick="generateTokens()">GENERATE TOKEN</button>
+          <button onclick="generateUuidV4()">GENERATE UUIDv4</button>
+          <button onclick="copyCurrentToken()">COPY TOKEN</button>
+          <button onclick="pipeTokenToDigest()">PIPE TO DIGEST</button>
+        </div>
+
+        <div class="panel-header" style="padding: 4px 6px; font-size: 10px;">
+          <span>GENERATED SECURE TOKEN</span>
+          <span id="token-format-label" style="color:var(--accent-amber)">HEX (256-BIT)</span>
+        </div>
+        <div id="token-output-val" class="token-display-box">--</div>
+
+        <div class="checksum-row" style="margin-top: 4px;">
+          <div class="checksum-header">
+            <span class="alg">SHA-256 DIGEST OF ACTIVE TOKEN</span>
+            <span style="cursor:pointer;color:var(--accent-red)" onclick="copyTokenHash()">[COPY]</span>
+          </div>
+          <div id="token-sha256" class="checksum-val" style="font-size:10px;">--</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span>[04B] REAL-TIME ENTROPY & PASSPHRASE AUDITOR</span>
+        <span>SHANNON ENGINE</span>
+      </div>
+      <div class="panel-body">
+        <textarea id="entropy-audit-input" style="min-height: 80px;" placeholder="ENTER PASSPHRASE, KEY, OR ARBITRARY STRING TO AUDIT INFORMATION ENTROPY..."></textarea>
+        
+        <div class="btn-row">
+          <button onclick="auditEntropy()">EVALUATE ENTROPY</button>
+          <button onclick="generatePassphraseSample()">LOAD TACTICAL PASSPHRASE</button>
+          <button onclick="clearEntropyInput()">CLEAR</button>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:6px; background:#050608; border:1px solid var(--border-color); padding:10px;">
+          <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-dim);">
+            <span>INFORMATION ENTROPY STRENGTH</span>
+            <span id="entropy-eval-label" style="color:var(--accent-green); font-weight:bold;">0% (NONE)</span>
+          </div>
+          <div class="entropy-bar-wrap">
+            <div id="entropy-progress" class="entropy-bar-fill"></div>
+          </div>
+        </div>
+
+        <div class="metrics-bar" style="margin-top:auto;">
+          <div class="metric-cell">
+            <span class="label">EST. POOL BITS</span>
+            <span class="val" id="metric-entropy-bits" style="color:var(--accent-cyan)">0</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">SHANNON (B/C)</span>
+            <span class="val" id="metric-shannon-val">0.00</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">CHARSET POOL</span>
+            <span class="val" id="metric-charset-pool">0</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">AUDIT SCORE</span>
+            <span class="val" id="metric-audit-score" style="color:var(--accent-green)">WAIT</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer>
-    <span>ARABELLANINE SECURE UTILITY // ZERO EXTERNAL NETWORK CALLS // SUITE V3.0</span>
+    <span>ARABELLANINE SECURE UTILITY // ZERO EXTERNAL NETWORK CALLS // SUITE V4.0</span>
     <span>DISPATCHED FROM THE DIGITALLY SEALED COCKPIT</span>
   </footer>
 
@@ -649,9 +774,12 @@
       document.getElementById('module-1-view').style.display = (mod === 1) ? 'grid' : 'none';
       document.getElementById('module-2-view').style.display = (mod === 2) ? 'grid' : 'none';
       document.getElementById('module-3-view').style.display = (mod === 3) ? 'grid' : 'none';
+      document.getElementById('module-4-view').style.display = (mod === 4) ? 'grid' : 'none';
       document.getElementById('tab-btn-m1').className = (mod === 1) ? 'nav-tab active' : 'nav-tab';
       document.getElementById('tab-btn-m2').className = (mod === 2) ? 'nav-tab active' : 'nav-tab';
       document.getElementById('tab-btn-m3').className = (mod === 3) ? 'nav-tab active' : 'nav-tab';
+      document.getElementById('tab-btn-m4').className = (mod === 4) ? 'nav-tab active' : 'nav-tab';
+      if (mod === 3 && typeof resizeScope === 'function') resizeScope();
     }
 
     // --- MODULE 01 LOGIC ---
@@ -848,7 +976,7 @@
       // URL
       outUrl.textContent = encodeURIComponent(text);
 
-      // Binary bitstream (truncate if very long for rendering speed)
+      // Binary bitstream
       let bitStr = '';
       const limit = Math.min(bytes.length, 32);
       for (let i = 0; i < limit; i++) {
@@ -871,7 +999,7 @@
     function generateSampleM2() {
       inputElM2.value = JSON.stringify({
         origin: "ARABELLANINE-TERMINAL",
-        protocol: "ASTRA-V3",
+        protocol: "ASTRA-V4",
         timestamp: Date.now(),
         node: "MACBOOK-PRIMARY",
         entropy: "0x7F91C80B"
@@ -926,7 +1054,6 @@
     const lapCounterEl = document.getElementById('lap-counter');
     const lapContainerEl = document.getElementById('lap-container');
 
-    // Update real-world UTC epoch
     setInterval(() => {
       epochEl.textContent = Math.floor(Date.now() / 1000);
     }, 1000);
@@ -951,7 +1078,6 @@
       const current = chronoElapsed + (now - chronoStartTime);
       chronoTimerEl.textContent = formatTime(current);
 
-      // Second beep if synced
       const currentSec = Math.floor(current / 1000);
       if (tickAudioSynced && currentSec > lastSecondTick) {
         lastSecondTick = currentSec;
@@ -1152,13 +1278,195 @@
       scopeCtx.stroke();
     }
 
-    // Set canvas dimensions
     function resizeScope() {
+      if (!scopeCanvas) return;
       scopeCanvas.width = scopeCanvas.clientWidth;
       scopeCanvas.height = scopeCanvas.clientHeight;
     }
     window.addEventListener('resize', resizeScope);
     resizeScope();
+
+    // --- MODULE 04: ENTROPY & SECURE TOKEN GENERATOR LOGIC ---
+    const tokenBytesSlider = document.getElementById('token-bytes-slider');
+    const valTokenLenEl = document.getElementById('val-token-len');
+    const tokenFormatSelect = document.getElementById('token-format-select');
+    const tokenOutputVal = document.getElementById('token-output-val');
+    const tokenFormatLabel = document.getElementById('token-format-label');
+    const tokenSha256El = document.getElementById('token-sha256');
+
+    function updateTokenLength() {
+      const bytes = tokenBytesSlider.value;
+      valTokenLenEl.textContent = `${bytes} BYTES (${bytes * 8}-BIT)`;
+      generateTokens();
+    }
+
+    async function hashTokenValue(str) {
+      if (!str || str === '--') {
+        tokenSha256El.textContent = '--';
+        return;
+      }
+      const enc = new TextEncoder();
+      const digest = await crypto.subtle.digest('SHA-256', enc.encode(str));
+      const arr = Array.from(new Uint8Array(digest));
+      tokenSha256El.textContent = arr.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function generateTokens() {
+      const numBytes = parseInt(tokenBytesSlider.value, 10);
+      const format = tokenFormatSelect.value;
+      const array = new Uint8Array(numBytes);
+      crypto.getRandomValues(array);
+
+      let token = '';
+      if (format === 'hex') {
+        token = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
+        tokenFormatLabel.textContent = `HEX (${numBytes * 8}-BIT)`;
+      } else if (format === 'hex-upper') {
+        token = Array.from(array).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join('');
+        tokenFormatLabel.textContent = `HEX-UPPER (${numBytes * 8}-BIT)`;
+      } else if (format === 'base64') {
+        let binary = '';
+        for (let i = 0; i < array.length; i++) binary += String.fromCharCode(array[i]);
+        token = btoa(binary);
+        tokenFormatLabel.textContent = `BASE64 (${token.length} CHARS)`;
+      } else if (format === 'base64url') {
+        let binary = '';
+        for (let i = 0; i < array.length; i++) binary += String.fromCharCode(array[i]);
+        token = btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        tokenFormatLabel.textContent = `BASE64URL SAFE (${token.length} CHARS)`;
+      } else if (format === 'alphanumeric') {
+        const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const mask = charset.length;
+        let res = '';
+        for (let i = 0; i < numBytes; i++) {
+          res += charset[array[i] % mask];
+        }
+        token = res;
+        tokenFormatLabel.textContent = `ALPHANUMERIC (${numBytes} CHARS)`;
+      }
+
+      tokenOutputVal.textContent = token;
+      hashTokenValue(token);
+    }
+
+    function generateUuidV4() {
+      const uuid = (crypto.randomUUID) ? crypto.randomUUID() : 'NATIVE-UUID-UNAVAILABLE';
+      tokenOutputVal.textContent = uuid;
+      tokenFormatLabel.textContent = 'UUID v4 (RFC 4122)';
+      hashTokenValue(uuid);
+    }
+
+    function copyCurrentToken() {
+      const text = tokenOutputVal.textContent;
+      if (text && text !== '--') navigator.clipboard.writeText(text);
+    }
+
+    function copyTokenHash() {
+      const text = tokenSha256El.textContent;
+      if (text && text !== '--') navigator.clipboard.writeText(text);
+    }
+
+    function pipeTokenToDigest() {
+      const text = tokenOutputVal.textContent;
+      if (!text || text === '--') return;
+      inputElM2.value = text;
+      updateM2();
+      switchModule(2);
+    }
+
+    // Entropy Auditor
+    const auditInputEl = document.getElementById('entropy-audit-input');
+    const entropyProgress = document.getElementById('entropy-progress');
+    const entropyEvalLabel = document.getElementById('entropy-eval-label');
+    const metricEntropyBits = document.getElementById('metric-entropy-bits');
+    const metricShannonVal = document.getElementById('metric-shannon-val');
+    const metricCharsetPool = document.getElementById('metric-charset-pool');
+    const metricAuditScore = document.getElementById('metric-audit-score');
+
+    function auditEntropy() {
+      const str = auditInputEl.value;
+      if (!str) {
+        entropyProgress.style.width = '0%';
+        entropyEvalLabel.textContent = '0% (NONE)';
+        metricEntropyBits.textContent = '0';
+        metricShannonVal.textContent = '0.00';
+        metricCharsetPool.textContent = '0';
+        metricAuditScore.textContent = 'WAIT';
+        metricAuditScore.style.color = 'var(--text-dim)';
+        return;
+      }
+
+      let pool = 0;
+      if (/[a-z]/.test(str)) pool += 26;
+      if (/[A-Z]/.test(str)) pool += 26;
+      if (/[0-9]/.test(str)) pool += 10;
+      if (/[^a-zA-Z0-9]/.test(str)) pool += 33;
+
+      const totalBits = Math.floor(str.length * (pool > 0 ? Math.log2(pool) : 0));
+
+      const freq = {};
+      for (let i = 0; i < str.length; i++) {
+        const c = str[i];
+        freq[c] = (freq[c] || 0) + 1;
+      }
+      let shannon = 0;
+      for (const k in freq) {
+        const p = freq[k] / str.length;
+        shannon -= p * Math.log2(p);
+      }
+
+      metricEntropyBits.textContent = totalBits;
+      metricShannonVal.textContent = shannon.toFixed(2);
+      metricCharsetPool.textContent = pool;
+
+      let pct = Math.min(Math.round((totalBits / 128) * 100), 100);
+      entropyProgress.style.width = pct + '%';
+
+      if (totalBits < 40) {
+        entropyProgress.style.background = 'var(--accent-red)';
+        entropyEvalLabel.textContent = `${pct}% (VULNERABLE / WEAK)`;
+        entropyEvalLabel.style.color = 'var(--accent-red)';
+        metricAuditScore.textContent = 'WEAK';
+        metricAuditScore.style.color = 'var(--accent-red)';
+      } else if (totalBits < 75) {
+        entropyProgress.style.background = 'var(--accent-amber)';
+        entropyEvalLabel.textContent = `${pct}% (MODERATE DEFENSE)`;
+        entropyEvalLabel.style.color = 'var(--accent-amber)';
+        metricAuditScore.textContent = 'FAIR';
+        metricAuditScore.style.color = 'var(--accent-amber)';
+      } else if (totalBits < 120) {
+        entropyProgress.style.background = 'var(--accent-cyan)';
+        entropyEvalLabel.textContent = `${pct}% (STRONG MIL-SPEC)`;
+        entropyEvalLabel.style.color = 'var(--accent-cyan)';
+        metricAuditScore.textContent = 'STRONG';
+        metricAuditScore.style.color = 'var(--accent-cyan)';
+      } else {
+        entropyProgress.style.background = 'var(--accent-green)';
+        entropyEvalLabel.textContent = `${pct}% (CRYPTOGRAPHIC MAXIMUM)`;
+        entropyEvalLabel.style.color = 'var(--accent-green)';
+        metricAuditScore.textContent = 'HARDENED';
+        metricAuditScore.style.color = 'var(--accent-green)';
+      }
+    }
+
+    function generatePassphraseSample() {
+      const words = ["ASTRAL", "RELIQUARY", "CIPHER", "PHANTOM", "PROTOCOL", "GRID", "TERMINAL", "MECHA", "SENTINEL", "PURGATORY"];
+      const array = new Uint32Array(4);
+      crypto.getRandomValues(array);
+      const pass = `${words[array[0] % words.length]}-${words[array[1] % words.length]}-${words[array[2] % words.length]}-${array[3] % 1000}`;
+      auditInputEl.value = pass;
+      auditEntropy();
+    }
+
+    function clearEntropyInput() {
+      auditInputEl.value = '';
+      auditEntropy();
+    }
+
+    auditInputEl.addEventListener('input', auditEntropy);
+
+    // Initial token generation on load
+    generateTokens();
   </script>
 </body>
 </html>
