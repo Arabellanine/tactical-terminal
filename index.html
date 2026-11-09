@@ -260,6 +260,91 @@
       padding: 4px;
     }
 
+    /* MODULE 03 SPECIFIC STYLES */
+    .chrono-display {
+      background: #040507;
+      border: 1px solid var(--border-color);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .chrono-digits {
+      font-size: 38px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: var(--accent-cyan);
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+    }
+    .chrono-sub {
+      display: flex;
+      gap: 16px;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+    .chrono-sub b { color: var(--accent-amber); }
+    .pulse-control-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      background: #050608;
+      border: 1px solid var(--border-color);
+      padding: 12px;
+    }
+    .ctrl-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .ctrl-group label {
+      font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .ctrl-group label span.val { color: var(--accent-cyan); }
+    input[type=range] {
+      accent-color: var(--accent-red);
+      background: #090a0f;
+    }
+    select {
+      background: #090a0f;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      padding: 4px;
+      font-size: 11px;
+    }
+    .scope-canvas {
+      width: 100%;
+      height: 90px;
+      background: #040507;
+      border: 1px solid var(--border-color);
+      display: block;
+    }
+    .lap-list {
+      background: #040507;
+      border: 1px solid var(--border-color);
+      max-height: 140px;
+      overflow-y: auto;
+      font-size: 11px;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .lap-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 3px 6px;
+      border-bottom: 1px dashed rgba(255,255,255,0.05);
+      color: #99aab5;
+    }
+    .lap-item span.idx { color: var(--accent-amber); }
+    .lap-item span.time { color: var(--accent-cyan); }
+
     footer {
       margin-top: 16px;
       padding-top: 10px;
@@ -276,15 +361,16 @@
   <header>
     <div class="brand-title">
       <span>TACTICAL TERMINAL</span>
-      <span class="badge">SPEC V2.0 // MULTI-MODULE</span>
+      <span class="badge">SPEC V3.0 // MULTI-MODULE</span>
     </div>
     <div class="nav-tabs">
       <div class="nav-tab" id="tab-btn-m1" onclick="switchModule(1)">[MOD 01] HEX & CANONICAL</div>
-      <div class="nav-tab active" id="tab-btn-m2" onclick="switchModule(2)">[MOD 02] PAYLOAD & HASH INSPECTOR</div>
+      <div class="nav-tab" id="tab-btn-m2" onclick="switchModule(2)">[MOD 02] PAYLOAD & HASH INSPECTOR</div>
+      <div class="nav-tab active" id="tab-btn-m3" onclick="switchModule(3)">[MOD 03] CHRONO & AUDIO PULSE</div>
     </div>
     <div class="status-group">
       <span>RUNTIME: <b>ZERO-DEPENDENCY</b></span>
-      <span>CRYPTO: <b>WEB CRYPTO API</b></span>
+      <span>AUDIO: <b>WEB AUDIO API</b></span>
       <span>FLEET: <b>ARABELLANINE</b></span>
     </div>
   </header>
@@ -348,7 +434,7 @@
   </div>
 
   <!-- MODULE 02: PAYLOAD ENCODER & HASH/CHECKSUM INSPECTOR -->
-  <div class="grid" id="module-2-view">
+  <div class="grid" id="module-2-view" style="display: none;">
     <div class="panel">
       <div class="panel-header">
         <span>[02A] PAYLOAD BUFFER & ENCODING MATRIX</span>
@@ -458,8 +544,102 @@
     </div>
   </div>
 
+  <!-- MODULE 03: TACTICAL CHRONOMETER & AUDIO PULSE GENERATOR -->
+  <div class="grid" id="module-3-view">
+    <div class="panel">
+      <div class="panel-header">
+        <span>[03A] HIGH-PRECISION TACTICAL CHRONOMETER</span>
+        <span id="chrono-state-badge" style="color:var(--accent-green)">ARMED</span>
+      </div>
+      <div class="panel-body">
+        <div class="chrono-display">
+          <div class="chrono-digits" id="chrono-timer">00:00:00.000</div>
+          <div class="chrono-sub">
+            <span>EPOCH (UTC): <b id="utc-epoch-now">0</b></span>
+            <span>FPS SYNC: <b id="raf-fps">60</b></span>
+            <span>LAPS: <b id="lap-counter">0</b></span>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="chrono-toggle-btn" onclick="toggleChrono()">START</button>
+          <button onclick="lapChrono()">LAP</button>
+          <button onclick="resetChrono()">RESET</button>
+          <button onclick="syncChronoBeep()">SYNC TICK AUDIO</button>
+        </div>
+
+        <div class="panel-header" style="padding: 4px 6px; font-size: 10px;">
+          <span>LAP LOGS</span>
+          <span style="cursor:pointer;color:var(--accent-red)" onclick="clearLaps()">[CLEAR]</span>
+        </div>
+        <div class="lap-list" id="lap-container">
+          <div class="lap-item">// NO LAPS RECORDED</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span>[03B] SYNTHESIZER OSCILLATOR & AUDIO PULSE</span>
+        <span>WEB AUDIO API</span>
+      </div>
+      <div class="panel-body">
+        <canvas id="scope-canvas" class="scope-canvas"></canvas>
+
+        <div class="pulse-control-grid">
+          <div class="ctrl-group">
+            <label>FREQUENCY <span class="val" id="val-freq">440 HZ</span></label>
+            <input type="range" id="param-freq" min="40" max="2400" step="10" value="440" oninput="updateAudioParams()">
+          </div>
+          <div class="ctrl-group">
+            <label>WAVEFORM</label>
+            <select id="param-wave" onchange="updateAudioParams()">
+              <option value="sine">SINE (PURE)</option>
+              <option value="square">SQUARE (TACTICAL/CHIP)</option>
+              <option value="sawtooth">SAWTOOTH (BUZZ)</option>
+              <option value="triangle">TRIANGLE (SOFT)</option>
+            </select>
+          </div>
+          <div class="ctrl-group">
+            <label>PULSE RATE (BPM) <span class="val" id="val-bpm">120 BPM</span></label>
+            <input type="range" id="param-bpm" min="30" max="300" step="5" value="120" oninput="updateBpm()">
+          </div>
+          <div class="ctrl-group">
+            <label>OUTPUT GAIN <span class="val" id="val-gain">15%</span></label>
+            <input type="range" id="param-gain" min="0" max="50" step="1" value="15" oninput="updateAudioParams()">
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="pulse-btn" onclick="togglePulse()">START AUDIO BEACON</button>
+          <button onclick="fireBeep(880, 0.08, 'square')">TACTICAL PING</button>
+          <button onclick="fireBeep(220, 0.25, 'sawtooth')">ALERT HORN</button>
+        </div>
+
+        <div class="metrics-bar" style="margin-top:auto;">
+          <div class="metric-cell">
+            <span class="label">AUDIO ENGINE</span>
+            <span class="val" id="audio-engine-state" style="color:var(--accent-amber)">STANDBY</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">SAMPLE RATE</span>
+            <span class="val" id="audio-sample-rate">48000 HZ</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">DRIFT COMPENSATION</span>
+            <span class="val" style="color:var(--accent-green)">PERFECT</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">SECURITY</span>
+            <span class="val" style="color:var(--accent-cyan)">AIR-GAPPED</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer>
-    <span>ARABELLANINE SECURE UTILITY // ZERO EXTERNAL NETWORK CALLS // SUITE V2.0</span>
+    <span>ARABELLANINE SECURE UTILITY // ZERO EXTERNAL NETWORK CALLS // SUITE V3.0</span>
     <span>DISPATCHED FROM THE DIGITALLY SEALED COCKPIT</span>
   </footer>
 
@@ -468,8 +648,10 @@
     function switchModule(mod) {
       document.getElementById('module-1-view').style.display = (mod === 1) ? 'grid' : 'none';
       document.getElementById('module-2-view').style.display = (mod === 2) ? 'grid' : 'none';
+      document.getElementById('module-3-view').style.display = (mod === 3) ? 'grid' : 'none';
       document.getElementById('tab-btn-m1').className = (mod === 1) ? 'nav-tab active' : 'nav-tab';
       document.getElementById('tab-btn-m2').className = (mod === 2) ? 'nav-tab active' : 'nav-tab';
+      document.getElementById('tab-btn-m3').className = (mod === 3) ? 'nav-tab active' : 'nav-tab';
     }
 
     // --- MODULE 01 LOGIC ---
@@ -621,7 +803,7 @@
       return ((crc ^ (-1)) >>> 0).toString(16).padStart(8, '0').toUpperCase();
     }
 
-    async function hashBuffer(algorithm, bytes) {
+    async function digestMessage(algorithm, bytes) {
       const hashBuffer = await crypto.subtle.digest(algorithm, bytes);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
@@ -632,8 +814,8 @@
       const encoder = new TextEncoder();
       const bytes = encoder.encode(text);
 
-      byteCounterM2.textContent = bytes.length + ' BYTES';
       m2Bytes.textContent = bytes.length;
+      byteCounterM2.textContent = bytes.length + ' BYTES';
 
       if (bytes.length === 0) {
         outB64.textContent = '--';
@@ -647,36 +829,53 @@
         return;
       }
 
-      // Base64 & Safe
+      // Base64
+      let b64 = '';
       try {
-        const b64 = btoa(unescape(encodeURIComponent(text)));
+        let binary = '';
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        b64 = btoa(binary);
         outB64.textContent = b64;
         outB64Url.textContent = b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
       } catch (e) {
-        outB64.textContent = 'ERR: ENCODING_FAILED';
-        outB64Url.textContent = 'ERR: ENCODING_FAILED';
+        outB64.textContent = 'ERR';
+        outB64Url.textContent = 'ERR';
       }
 
       // URL
       outUrl.textContent = encodeURIComponent(text);
 
-      // Binary stream
-      let binStr = '';
-      for (let i = 0; i < Math.min(bytes.length, 64); i++) {
-        binStr += bytes[i].toString(2).padStart(8, '0') + ' ';
+      // Binary bitstream (truncate if very long for rendering speed)
+      let bitStr = '';
+      const limit = Math.min(bytes.length, 32);
+      for (let i = 0; i < limit; i++) {
+        bitStr += bytes[i].toString(2).padStart(8, '0') + ' ';
       }
-      if (bytes.length > 64) binStr += '... [TRUNCATED]';
-      outBin.textContent = binStr;
+      if (bytes.length > 32) bitStr += `... (+${bytes.length - 32} bytes)`;
+      outBin.textContent = bitStr;
 
-      // Hashes via Web Crypto
-      hashSha256.textContent = await hashBuffer('SHA-256', bytes);
-      hashSha512.textContent = await hashBuffer('SHA-512', bytes);
-      hashSha1.textContent = await hashBuffer('SHA-1', bytes);
-      hashCrc32.textContent = calculateCrc32(bytes);
+      // Hashes
+      try {
+        hashSha256.textContent = await digestMessage('SHA-256', bytes);
+        hashSha512.textContent = await digestMessage('SHA-512', bytes);
+        hashSha1.textContent = await digestMessage('SHA-1', bytes);
+        hashCrc32.textContent = calculateCrc32(bytes);
+      } catch(e) {
+        console.error(e);
+      }
     }
 
     function generateSampleM2() {
-      inputElM2.value = 'ARABELLA_TACTICAL_TOKEN_SIG::ed25519::nonce_992182049::payload_auth_ok';
+      inputElM2.value = JSON.stringify({
+        origin: "ARABELLANINE-TERMINAL",
+        protocol: "ASTRA-V3",
+        timestamp: Date.now(),
+        node: "MACBOOK-PRIMARY",
+        entropy: "0x7F91C80B"
+      }, null, 2);
       updateM2();
     }
 
@@ -691,29 +890,275 @@
       switchModule(1);
     }
 
-    function copyCodec(type) {
-      let target = '';
-      if (type === 'b64') target = outB64.textContent;
-      if (type === 'b64url') target = outB64Url.textContent;
-      if (type === 'url') target = outUrl.textContent;
-      if (type === 'bin') target = outBin.textContent;
-      if (target && target !== '--') navigator.clipboard.writeText(target);
+    function copyCodec(id) {
+      let text = '';
+      if (id === 'b64') text = outB64.textContent;
+      if (id === 'b64url') text = outB64Url.textContent;
+      if (id === 'url') text = outUrl.textContent;
+      if (id === 'bin') text = outBin.textContent;
+      if (text && text !== '--') navigator.clipboard.writeText(text);
     }
 
-    function copyHash(type) {
-      let target = '';
-      if (type === 'sha256') target = hashSha256.textContent;
-      if (type === 'sha512') target = hashSha512.textContent;
-      if (type === 'sha1') target = hashSha1.textContent;
-      if (type === 'crc32') target = hashCrc32.textContent;
-      if (target) navigator.clipboard.writeText(target);
+    function copyHash(id) {
+      let text = '';
+      if (id === 'sha256') text = hashSha256.textContent;
+      if (id === 'sha512') text = hashSha512.textContent;
+      if (id === 'sha1') text = hashSha1.textContent;
+      if (id === 'crc32') text = hashCrc32.textContent;
+      if (text) navigator.clipboard.writeText(text);
     }
 
     inputElM2.addEventListener('input', updateM2);
 
-    // Initial setup
-    generateSampleM1();
-    generateSampleM2();
+    // --- MODULE 03: CHRONOMETER & AUDIO SYNTHESIS LOGIC ---
+    let chronoRunning = false;
+    let chronoStartTime = 0;
+    let chronoElapsed = 0;
+    let chronoRafId = null;
+    let laps = [];
+    let tickAudioSynced = false;
+    let lastSecondTick = 0;
+
+    const chronoTimerEl = document.getElementById('chrono-timer');
+    const chronoToggleBtn = document.getElementById('chrono-toggle-btn');
+    const chronoBadge = document.getElementById('chrono-state-badge');
+    const epochEl = document.getElementById('utc-epoch-now');
+    const lapCounterEl = document.getElementById('lap-counter');
+    const lapContainerEl = document.getElementById('lap-container');
+
+    // Update real-world UTC epoch
+    setInterval(() => {
+      epochEl.textContent = Math.floor(Date.now() / 1000);
+    }, 1000);
+    epochEl.textContent = Math.floor(Date.now() / 1000);
+
+    function formatTime(ms) {
+      const h = Math.floor(ms / 3600000);
+      const m = Math.floor((ms % 3600000) / 60000);
+      const s = Math.floor((ms % 60000) / 1000);
+      const rem = Math.floor(ms % 1000);
+      return (
+        h.toString().padStart(2, '0') + ':' +
+        m.toString().padStart(2, '0') + ':' +
+        s.toString().padStart(2, '0') + '.' +
+        rem.toString().padStart(3, '0')
+      );
+    }
+
+    function updateChronoFrame() {
+      if (!chronoRunning) return;
+      const now = performance.now();
+      const current = chronoElapsed + (now - chronoStartTime);
+      chronoTimerEl.textContent = formatTime(current);
+
+      // Second beep if synced
+      const currentSec = Math.floor(current / 1000);
+      if (tickAudioSynced && currentSec > lastSecondTick) {
+        lastSecondTick = currentSec;
+        fireBeep(currentSec % 60 === 0 ? 1200 : 800, 0.03, 'sine');
+      }
+
+      chronoRafId = requestAnimationFrame(updateChronoFrame);
+    }
+
+    function toggleChrono() {
+      if (chronoRunning) {
+        chronoRunning = false;
+        chronoElapsed += performance.now() - chronoStartTime;
+        cancelAnimationFrame(chronoRafId);
+        chronoToggleBtn.textContent = 'RESUME';
+        chronoBadge.textContent = 'PAUSED';
+        chronoBadge.style.color = 'var(--accent-amber)';
+      } else {
+        chronoRunning = true;
+        chronoStartTime = performance.now();
+        lastSecondTick = Math.floor(chronoElapsed / 1000);
+        chronoRafId = requestAnimationFrame(updateChronoFrame);
+        chronoToggleBtn.textContent = 'HALT';
+        chronoBadge.textContent = 'RUNNING';
+        chronoBadge.style.color = 'var(--accent-green)';
+      }
+    }
+
+    function resetChrono() {
+      chronoRunning = false;
+      cancelAnimationFrame(chronoRafId);
+      chronoElapsed = 0;
+      chronoTimerEl.textContent = '00:00:00.000';
+      chronoToggleBtn.textContent = 'START';
+      chronoBadge.textContent = 'ARMED';
+      chronoBadge.style.color = 'var(--accent-green)';
+    }
+
+    function lapChrono() {
+      const now = chronoRunning ? chronoElapsed + (performance.now() - chronoStartTime) : chronoElapsed;
+      if (now === 0) return;
+      laps.unshift({ idx: laps.length + 1, time: formatTime(now) });
+      renderLaps();
+    }
+
+    function clearLaps() {
+      laps = [];
+      renderLaps();
+    }
+
+    function renderLaps() {
+      lapCounterEl.textContent = laps.length;
+      if (laps.length === 0) {
+        lapContainerEl.innerHTML = '<div class="lap-item">// NO LAPS RECORDED</div>';
+        return;
+      }
+      lapContainerEl.innerHTML = laps.map(l => 
+        `<div class="lap-item"><span class="idx">LAP #${l.idx.toString().padStart(2, '0')}</span><span class="time">${l.time}</span></div>`
+      ).join('');
+    }
+
+    function syncChronoBeep() {
+      tickAudioSynced = !tickAudioSynced;
+      ensureAudioContext();
+      alert(tickAudioSynced ? 'TICK AUDIO SYNC: ENABLED' : 'TICK AUDIO SYNC: DISABLED');
+    }
+
+    // --- WEB AUDIO API ENGINE ---
+    let audioCtx = null;
+    let beaconOsc = null;
+    let beaconGain = null;
+    let beaconTimer = null;
+    let beaconActive = false;
+    let analyserNode = null;
+
+    const scopeCanvas = document.getElementById('scope-canvas');
+    const scopeCtx = scopeCanvas.getContext('2d');
+    const audioEngineStateEl = document.getElementById('audio-engine-state');
+    const audioSampleRateEl = document.getElementById('audio-sample-rate');
+    const valFreqEl = document.getElementById('val-freq');
+    const valBpmEl = document.getElementById('val-bpm');
+    const valGainEl = document.getElementById('val-gain');
+
+    function ensureAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContextClass();
+        analyserNode = audioCtx.createAnalyser();
+        analyserNode.fftSize = 256;
+        analyserNode.connect(audioCtx.destination);
+        audioSampleRateEl.textContent = audioCtx.sampleRate + ' HZ';
+        drawOscilloscope();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      audioEngineStateEl.textContent = audioCtx.state.toUpperCase();
+      audioEngineStateEl.style.color = 'var(--accent-green)';
+    }
+
+    function updateAudioParams() {
+      const freq = document.getElementById('param-freq').value;
+      const gain = document.getElementById('param-gain').value;
+      valFreqEl.textContent = freq + ' HZ';
+      valGainEl.textContent = gain + '%';
+      if (beaconOsc) {
+        beaconOsc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        beaconOsc.type = document.getElementById('param-wave').value;
+      }
+      if (beaconGain) {
+        beaconGain.gain.setValueAtTime(gain / 100, audioCtx.currentTime);
+      }
+    }
+
+    function updateBpm() {
+      const bpm = document.getElementById('param-bpm').value;
+      valBpmEl.textContent = bpm + ' BPM';
+      if (beaconActive) {
+        clearInterval(beaconTimer);
+        const interval = (60 / bpm) * 1000;
+        beaconTimer = setInterval(triggerPulseBeat, interval);
+      }
+    }
+
+    function fireBeep(freq, duration, type) {
+      ensureAudioContext();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const masterVol = (document.getElementById('param-gain').value / 100) || 0.15;
+
+      osc.type = type || document.getElementById('param-wave').value;
+      osc.frequency.setValueAtTime(freq || document.getElementById('param-freq').value, audioCtx.currentTime);
+      
+      gain.gain.setValueAtTime(masterVol, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+
+      osc.connect(gain);
+      gain.connect(analyserNode);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function triggerPulseBeat() {
+      const freq = parseFloat(document.getElementById('param-freq').value);
+      const wave = document.getElementById('param-wave').value;
+      fireBeep(freq, 0.08, wave);
+    }
+
+    function togglePulse() {
+      ensureAudioContext();
+      const btn = document.getElementById('pulse-btn');
+      if (beaconActive) {
+        clearInterval(beaconTimer);
+        beaconActive = false;
+        btn.textContent = 'START AUDIO BEACON';
+        btn.classList.remove('active');
+      } else {
+        beaconActive = true;
+        const bpm = parseFloat(document.getElementById('param-bpm').value);
+        const interval = (60 / bpm) * 1000;
+        triggerPulseBeat();
+        beaconTimer = setInterval(triggerPulseBeat, interval);
+        btn.textContent = 'HALT AUDIO BEACON';
+        btn.classList.add('active');
+      }
+    }
+
+    function drawOscilloscope() {
+      requestAnimationFrame(drawOscilloscope);
+      if (!analyserNode) return;
+
+      const bufferLength = analyserNode.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      analyserNode.getByteTimeDomainData(dataArray);
+
+      scopeCtx.fillStyle = '#040507';
+      scopeCtx.fillRect(0, 0, scopeCanvas.width, scopeCanvas.height);
+
+      scopeCtx.lineWidth = 1.5;
+      scopeCtx.strokeStyle = '#00f0ff';
+      scopeCtx.beginPath();
+
+      const sliceWidth = scopeCanvas.width * 1.0 / bufferLength;
+      let x = 0;
+
+      for (let i = 0; i < bufferLength; i++) {
+        const v = dataArray[i] / 128.0;
+        const y = v * (scopeCanvas.height / 2);
+
+        if (i === 0) scopeCtx.moveTo(x, y);
+        else scopeCtx.lineTo(x, y);
+
+        x += sliceWidth;
+      }
+
+      scopeCtx.lineTo(scopeCanvas.width, scopeCanvas.height / 2);
+      scopeCtx.stroke();
+    }
+
+    // Set canvas dimensions
+    function resizeScope() {
+      scopeCanvas.width = scopeCanvas.clientWidth;
+      scopeCanvas.height = scopeCanvas.clientHeight;
+    }
+    window.addEventListener('resize', resizeScope);
+    resizeScope();
   </script>
 </body>
 </html>
