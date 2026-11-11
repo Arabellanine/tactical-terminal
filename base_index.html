@@ -1,0 +1,1944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TACTICAL TERMINAL // ARABELLANINE</title>
+  <style>
+    :root {
+      --bg: #090a0f;
+      --panel-bg: rgba(16, 18, 27, 0.9);
+      --border-color: #2a2f42;
+      --border-bright: #ff3344;
+      --accent-red: #ff3344;
+      --accent-amber: #ffaa00;
+      --accent-cyan: #00f0ff;
+      --accent-green: #00ff66;
+      --text-main: #d0d7de;
+      --text-dim: #606778;
+      --font-mono: "SF Mono", Monaco, Consolas, "Courier New", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.4;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      overflow-x: hidden;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--accent-red);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .brand-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .badge {
+      background: rgba(255, 51, 68, 0.2);
+      border: 1px solid var(--accent-red);
+      color: var(--accent-red);
+      padding: 2px 6px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .nav-tab {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      color: var(--text-dim);
+      padding: 6px 12px;
+      font-size: 11px;
+      cursor: pointer;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+    .nav-tab.active {
+      background: rgba(255, 51, 68, 0.15);
+      border-color: var(--accent-red);
+      color: #fff;
+    }
+    .status-group {
+      display: flex;
+      gap: 12px;
+      font-size: 11px;
+      color: var(--text-dim);
+      flex-wrap: wrap;
+    }
+    .status-group span b { color: var(--accent-cyan); }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      flex: 1;
+    }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 2px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .panel::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; width: 6px; height: 6px;
+      border-top: 2px solid var(--accent-red);
+      border-left: 2px solid var(--accent-red);
+    }
+    .panel-header {
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid var(--border-color);
+      padding: 8px 12px;
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      display: flex;
+      justify-content: space-between;
+      color: var(--accent-amber);
+    }
+    .panel-body {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+    textarea, input[type="text"] {
+      width: 100%;
+      background: #050608;
+      border: 1px solid var(--border-color);
+      color: var(--accent-cyan);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 10px;
+      outline: none;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+    textarea:focus, input[type="text"]:focus {
+      border-color: var(--accent-cyan);
+    }
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    button {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.15s ease;
+    }
+    button:hover {
+      background: var(--accent-red);
+      color: #fff;
+      border-color: var(--accent-red);
+    }
+    button.active {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+    .hex-dump {
+      background: #040507;
+      border: 1px solid var(--border-color);
+      padding: 10px;
+      font-size: 11px;
+      overflow-x: auto;
+      white-space: pre;
+      color: #99aab5;
+      max-height: 320px;
+      line-height: 1.5;
+    }
+    .metrics-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 8px;
+      border: 1px solid var(--border-color);
+    }
+    .metric-cell {
+      display: flex;
+      flex-direction: column;
+      font-size: 10px;
+    }
+    .metric-cell .label { color: var(--text-dim); }
+    .metric-cell .val { font-size: 13px; font-weight: bold; color: #fff; }
+    
+    /* MODULE 02 SPECIFIC STYLES */
+    .checksum-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      background: #050608;
+      border: 1px solid var(--border-color);
+      padding: 10px;
+    }
+    .checksum-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .checksum-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+    .checksum-header span.alg {
+      color: var(--accent-amber);
+      font-weight: bold;
+    }
+    .checksum-val {
+      font-size: 11px;
+      color: var(--accent-cyan);
+      word-break: break-all;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 4px 6px;
+      border: 1px dashed #1e2230;
+      user-select: all;
+    }
+    .codec-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .codec-box {
+      background: #050608;
+      border: 1px solid var(--border-color);
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .codec-label {
+      font-size: 10px;
+      color: var(--text-dim);
+      display: flex;
+      justify-content: space-between;
+    }
+    .codec-label span.tag { color: var(--accent-green); }
+    .codec-output {
+      font-size: 11px;
+      color: #d0d7de;
+      height: 70px;
+      overflow-y: auto;
+      word-break: break-all;
+      white-space: pre-wrap;
+      background: rgba(0,0,0,0.4);
+      padding: 4px;
+    }
+
+    /* MODULE 03 SPECIFIC STYLES */
+    .chrono-display {
+      background: #040507;
+      border: 1px solid var(--border-color);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .chrono-digits {
+      font-size: 38px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: var(--accent-cyan);
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+    }
+    .chrono-sub {
+      display: flex;
+      gap: 16px;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+    .chrono-sub b { color: var(--accent-amber); }
+    .pulse-control-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      background: #050608;
+      border: 1px solid var(--border-color);
+      padding: 12px;
+    }
+    .ctrl-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .ctrl-group label {
+      font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .ctrl-group label span.val { color: var(--accent-cyan); }
+    input[type=range] {
+      accent-color: var(--accent-red);
+      background: #090a0f;
+    }
+    select {
+      background: #090a0f;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      padding: 4px;
+      font-size: 11px;
+    }
+    .scope-canvas {
+      width: 100%;
+      height: 90px;
+      background: #040507;
+      border: 1px solid var(--border-color);
+      display: block;
+    }
+    .lap-list {
+      background: #040507;
+      border: 1px solid var(--border-color);
+      max-height: 140px;
+      overflow-y: auto;
+      font-size: 11px;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .lap-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 3px 6px;
+      border-bottom: 1px dashed rgba(255,255,255,0.05);
+      color: #99aab5;
+    }
+    .lap-item span.idx { color: var(--accent-amber); }
+    .lap-item span.time { color: var(--accent-cyan); }
+
+    /* MODULE 04 SPECIFIC STYLES */
+    .entropy-bar-wrap {
+      width: 100%;
+      height: 8px;
+      background: #050608;
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .entropy-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent-green);
+      transition: width 0.2s ease, background 0.2s ease;
+    }
+    .token-display-box {
+      background: #050608;
+      border: 1px solid var(--border-color);
+      padding: 10px;
+      font-size: 12px;
+      color: var(--accent-cyan);
+      word-break: break-all;
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      user-select: all;
+    }
+
+    /* MODULE 05 SPECIFIC STYLES: SUBNET & BITMASK MATRIX */
+    .matrix-field-table {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: #050608;
+      border: 1px solid var(--border-color);
+      padding: 10px;
+    }
+    .matrix-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      padding: 3px 0;
+      border-bottom: 1px dashed rgba(255,255,255,0.05);
+    }
+    .matrix-row:last-child { border-bottom: none; }
+    .matrix-label { color: var(--text-dim); }
+    .matrix-val { color: var(--accent-cyan); font-weight: 600; }
+    .matrix-val.highlight { color: var(--accent-green); }
+    .matrix-val.warn { color: var(--accent-amber); }
+    .matrix-val.alert { color: var(--accent-red); }
+
+    .bitmask-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: #050608;
+      border: 1px solid var(--border-color);
+      padding: 12px;
+    }
+    .octet-grid-wrapper {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .octet-block {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid #1a1e2d;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .octet-title {
+      font-size: 10px;
+      color: var(--text-dim);
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .octet-title b { color: var(--accent-amber); }
+    .bits-8 {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 2px;
+      width: 100%;
+    }
+    .bit-cell {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: bold;
+      border-radius: 1px;
+      background: #11141e;
+      color: #4a5168;
+      border: 1px solid #1c2233;
+      user-select: none;
+    }
+    .bit-cell.net-bit {
+      background: rgba(0, 240, 255, 0.2);
+      color: var(--accent-cyan);
+      border-color: rgba(0, 240, 255, 0.4);
+    }
+    .bit-cell.host-bit {
+      background: rgba(255, 170, 0, 0.15);
+      color: var(--accent-amber);
+      border-color: rgba(255, 170, 0, 0.3);
+    }
+    .bit-legend {
+      display: flex;
+      gap: 16px;
+      font-size: 10px;
+      color: var(--text-dim);
+      align-items: center;
+      margin-top: 4px;
+    }
+    .legend-chip {
+      width: 10px;
+      height: 10px;
+      display: inline-block;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+
+    footer {
+      margin-top: 16px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--accent-red); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand-title">
+      <span>TACTICAL TERMINAL</span>
+      <span class="badge">SPEC V5.0 // SECURE PROTOCOLS</span>
+    </div>
+    <div class="nav-tabs">
+      <div class="nav-tab active" id="tab-btn-m1" onclick="switchModule(1)">[MOD 01] HEX & CANONICAL</div>
+      <div class="nav-tab" id="tab-btn-m2" onclick="switchModule(2)">[MOD 02] PAYLOAD & HASH INSPECTOR</div>
+      <div class="nav-tab" id="tab-btn-m3" onclick="switchModule(3)">[MOD 03] CHRONO & AUDIO PULSE</div>
+      <div class="nav-tab" id="tab-btn-m4" onclick="switchModule(4)">[MOD 04] ENTROPY & TOKENS</div>
+      <div class="nav-tab" id="tab-btn-m5" onclick="switchModule(5)">[MOD 05] SUBNET & BITMASK MATRIX</div>
+    </div>
+    <div class="status-group">
+      <span>RUNTIME: <b>ZERO-DEPENDENCY</b></span>
+      <span>CRYPTO: <b>WEB CRYPTO API</b></span>
+      <span>FLEET: <b>ARABELLANINE</b></span>
+    </div>
+  </header>
+
+  <!-- MODULE 01: HEX & CANONICAL -->
+  <div class="grid" id="module-1-view">
+    <div class="panel">
+      <div class="panel-header">
+        <span>[01] INGESTION BUFFER & TRANSFORM</span>
+        <span id="byte-counter-m1">0 BYTES</span>
+      </div>
+      <div class="panel-body">
+        <textarea id="raw-input-m1" placeholder="PASTE ASCII, STRING PAYLOAD, OR ENCODED DATA STREAM HERE..."></textarea>
+        
+        <div class="btn-row">
+          <button onclick="applyTransformM1('rot13')">ROT-13</button>
+          <button onclick="applyTransformM1('base64-enc')">BASE64 ENC</button>
+          <button onclick="applyTransformM1('base64-dec')">BASE64 DEC</button>
+          <button onclick="applyTransformM1('url-enc')">URL ENC</button>
+          <button onclick="applyTransformM1('url-dec')">URL DEC</button>
+          <button onclick="applyTransformM1('reverse')">REVERSE</button>
+          <button onclick="applyTransformM1('clear')">CLEAR</button>
+        </div>
+
+        <div class="metrics-bar">
+          <div class="metric-cell">
+            <span class="label">CHAR COUNT</span>
+            <span class="val" id="m1-chars">0</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">RAW BYTES</span>
+            <span class="val" id="m1-bytes">0</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">SHANNON ENTROPY</span>
+            <span class="val" id="m1-entropy">0.00</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">BIT DENSITY</span>
+            <span class="val" id="m1-density">0%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span>[02] HEXADECIMAL INSPECTOR DUMP</span>
+        <span>CANONICAL VIEW</span>
+      </div>
+      <div class="panel-body">
+        <div id="hex-view" class="hex-dump">// WAITING FOR DATA INGESTION...</div>
+        
+        <div class="btn-row">
+          <button onclick="copyOutputM1('hex')">COPY HEX</button>
+          <button onclick="copyOutputM1('c-array')">COPY C ARRAY</button>
+          <button onclick="generateSampleM1()">LOAD TEST VECTOR</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 02: PAYLOAD ENCODER & HASH/CHECKSUM INSPECTOR -->
+  <div class="grid" id="module-2-view" style="display: none;">
+    <div class="panel">
+      <div class="panel-header">
+        <span>[02A] PAYLOAD BUFFER & ENCODING MATRIX</span>
+        <span id="byte-counter-m2">0 BYTES</span>
+      </div>
+      <div class="panel-body">
+        <textarea id="raw-input-m2" placeholder="INGEST PAYLOAD STREAM (ASCII / UTF-8 / JSON / TOKENS)..."></textarea>
+        
+        <div class="btn-row">
+          <button onclick="generateSampleM2()">LOAD PAYLOAD VECTOR</button>
+          <button onclick="clearM2()">PURGE BUFFER</button>
+          <button onclick="syncToModule1()">INSPECT IN HEX [M1]</button>
+        </div>
+
+        <div class="codec-grid">
+          <div class="codec-box">
+            <div class="codec-label">
+              <span>BASE64 (RFC 4648)</span>
+              <span class="tag" style="cursor:pointer" onclick="copyCodec('b64')">[COPY]</span>
+            </div>
+            <div id="out-b64" class="codec-output">--</div>
+          </div>
+          <div class="codec-box">
+            <div class="codec-label">
+              <span>BASE64URL (SAFE)</span>
+              <span class="tag" style="cursor:pointer" onclick="copyCodec('b64url')">[COPY]</span>
+            </div>
+            <div id="out-b64url" class="codec-output">--</div>
+          </div>
+          <div class="codec-box">
+            <div class="codec-label">
+              <span>URL ENCODED (COMPONENT)</span>
+              <span class="tag" style="cursor:pointer" onclick="copyCodec('url')">[COPY]</span>
+            </div>
+            <div id="out-url" class="codec-output">--</div>
+          </div>
+          <div class="codec-box">
+            <div class="codec-label">
+              <span>BINARY BITSTREAM</span>
+              <span class="tag" style="cursor:pointer" onclick="copyCodec('bin')">[COPY]</span>
+            </div>
+            <div id="out-bin" class="codec-output">--</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span>[02B] HARDWARE CRYPTOGRAPHIC CHECKSUMS</span>
+        <span>WEB CRYPTO ENGINE</span>
+      </div>
+      <div class="panel-body">
+        <div class="checksum-grid">
+          <div class="checksum-row">
+            <div class="checksum-header">
+              <span class="alg">SHA-256 (SECURE HASH 256)</span>
+              <span style="cursor:pointer;color:var(--accent-red)" onclick="copyHash('sha256')">[COPY]</span>
+            </div>
+            <div id="hash-sha256" class="checksum-val">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</div>
+          </div>
+
+          <div class="checksum-row">
+            <div class="checksum-header">
+              <span class="alg">SHA-512 (HIGH STRENGTH DIGEST)</span>
+              <span style="cursor:pointer;color:var(--accent-red)" onclick="copyHash('sha512')">[COPY]</span>
+            </div>
+            <div id="hash-sha512" class="checksum-val">cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e</div>
+          </div>
+
+          <div class="checksum-row">
+            <div class="checksum-header">
+              <span class="alg">SHA-1 (LEGACY DIGEST)</span>
+              <span style="cursor:pointer;color:var(--accent-red)" onclick="copyHash('sha1')">[COPY]</span>
+            </div>
+            <div id="hash-sha1" class="checksum-val">da39a3ee5e6b4b0d3255bfef95601890afd80709</div>
+          </div>
+
+          <div class="checksum-row">
+            <div class="checksum-header">
+              <span class="alg">CRC32 (ETHERNET / ZIP POLYNOMIAL)</span>
+              <span style="cursor:pointer;color:var(--accent-red)" onclick="copyHash('crc32')">[COPY]</span>
+            </div>
+            <div id="hash-crc32" class="checksum-val">00000000</div>
+          </div>
+        </div>
+
+        <div class="metrics-bar" style="margin-top:auto;">
+          <div class="metric-cell">
+            <span class="label">INGEST BYTES</span>
+            <span class="val" id="m2-bytes">0</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">DIGEST ENGINE</span>
+            <span class="val" style="color:var(--accent-green)">NATIVE</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">ZERO NETWORK</span>
+            <span class="val" style="color:var(--accent-cyan)">SEALED</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">STATUS</span>
+            <span class="val" id="m2-status">READY</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 03: TACTICAL CHRONOMETER & AUDIO PULSE GENERATOR -->
+  <div class="grid" id="module-3-view" style="display: none;">
+    <div class="panel">
+      <div class="panel-header">
+        <span>[03A] HIGH-PRECISION TACTICAL CHRONOMETER</span>
+        <span id="chrono-state-badge" style="color:var(--accent-green)">ARMED</span>
+      </div>
+      <div class="panel-body">
+        <div class="chrono-display">
+          <div class="chrono-digits" id="chrono-timer">00:00:00.000</div>
+          <div class="chrono-sub">
+            <span>EPOCH (UTC): <b id="utc-epoch-now">0</b></span>
+            <span>FPS SYNC: <b id="raf-fps">60</b></span>
+            <span>LAPS: <b id="lap-counter">0</b></span>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="chrono-toggle-btn" onclick="toggleChrono()">START</button>
+          <button onclick="lapChrono()">LAP</button>
+          <button onclick="resetChrono()">RESET</button>
+          <button onclick="syncChronoBeep()">SYNC TICK AUDIO</button>
+        </div>
+
+        <div class="panel-header" style="padding: 4px 6px; font-size: 10px;">
+          <span>LAP LOGS</span>
+          <span style="cursor:pointer;color:var(--accent-red)" onclick="clearLaps()">[CLEAR]</span>
+        </div>
+        <div class="lap-list" id="lap-container">
+          <div class="lap-item">// NO LAPS RECORDED</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span>[03B] SYNTHESIZER OSCILLATOR & AUDIO PULSE</span>
+        <span>WEB AUDIO API</span>
+      </div>
+      <div class="panel-body">
+        <canvas id="scope-canvas" class="scope-canvas"></canvas>
+
+        <div class="pulse-control-grid">
+          <div class="ctrl-group">
+            <label>FREQUENCY <span class="val" id="val-freq">440 HZ</span></label>
+            <input type="range" id="param-freq" min="40" max="2400" step="10" value="440" oninput="updateAudioParams()">
+          </div>
+          <div class="ctrl-group">
+            <label>WAVEFORM</label>
+            <select id="param-wave" onchange="updateAudioParams()">
+              <option value="sine">SINE (PURE)</option>
+              <option value="square">SQUARE (TACTICAL/CHIP)</option>
+              <option value="sawtooth">SAWTOOTH (BUZZ)</option>
+              <option value="triangle">TRIANGLE (SOFT)</option>
+            </select>
+          </div>
+          <div class="ctrl-group">
+            <label>PULSE RATE (BPM) <span class="val" id="val-bpm">120 BPM</span></label>
+            <input type="range" id="param-bpm" min="30" max="300" step="5" value="120" oninput="updateBpm()">
+          </div>
+          <div class="ctrl-group">
+            <label>OUTPUT GAIN <span class="val" id="val-gain">15%</span></label>
+            <input type="range" id="param-gain" min="0" max="50" step="1" value="15" oninput="updateAudioParams()">
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="pulse-btn" onclick="togglePulse()">START AUDIO BEACON</button>
+          <button onclick="fireBeep(880, 0.08, 'square')">TACTICAL PING</button>
+          <button onclick="fireBeep(220, 0.25, 'sawtooth')">ALERT HORN</button>
+        </div>
+
+        <div class="metrics-bar" style="margin-top:auto;">
+          <div class="metric-cell">
+            <span class="label">AUDIO ENGINE</span>
+            <span class="val" id="audio-engine-state" style="color:var(--accent-amber)">STANDBY</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">SAMPLE RATE</span>
+            <span class="val" id="audio-sample-rate">48000 HZ</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">DRIFT COMPENSATION</span>
+            <span class="val" style="color:var(--accent-green)">PERFECT</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">SECURITY</span>
+            <span class="val" style="color:var(--accent-cyan)">AIR-GAPPED</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 04: TACTICAL ENTROPY & SECURE TOKEN GENERATOR -->
+  <div class="grid" id="module-4-view" style="display: none;">
+    <div class="panel">
+      <div class="panel-header">
+        <span>[04A] HARDWARE CSPRNG TOKEN FORGE</span>
+        <span style="color:var(--accent-green)">CSPRNG ONLINE</span>
+      </div>
+      <div class="panel-body">
+        <div class="pulse-control-grid">
+          <div class="ctrl-group">
+            <label>TOKEN BYTE LENGTH <span class="val" id="val-token-len">32 BYTES (256-BIT)</span></label>
+            <input type="range" id="token-bytes-slider" min="8" max="128" step="8" value="32" oninput="updateTokenLength()">
+          </div>
+          <div class="ctrl-group">
+            <label>OUTPUT FORMAT</label>
+            <select id="token-format-select" onchange="generateTokens()">
+              <option value="hex">HEXADECIMAL (LOWERCASE)</option>
+              <option value="hex-upper">HEXADECIMAL (UPPERCASE)</option>
+              <option value="base64">BASE64 (STANDARD)</option>
+              <option value="base64url">BASE64URL (URL SAFE)</option>
+              <option value="alphanumeric">ALPHANUMERIC (TACTICAL KEY)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button onclick="generateTokens()">GENERATE TOKEN</button>
+          <button onclick="generateUuidV4()">GENERATE UUIDv4</button>
+          <button onclick="copyCurrentToken()">COPY TOKEN</button>
+          <button onclick="pipeTokenToDigest()">PIPE TO DIGEST</button>
+        </div>
+
+        <div class="panel-header" style="padding: 4px 6px; font-size: 10px;">
+          <span>GENERATED SECURE TOKEN</span>
+          <span id="token-format-label" style="color:var(--accent-amber)">HEX (256-BIT)</span>
+        </div>
+        <div id="token-output-val" class="token-display-box">--</div>
+
+        <div class="checksum-row" style="margin-top: 4px;">
+          <div class="checksum-header">
+            <span class="alg">SHA-256 DIGEST OF ACTIVE TOKEN</span>
+            <span style="cursor:pointer;color:var(--accent-red)" onclick="copyTokenHash()">[COPY]</span>
+          </div>
+          <div id="token-sha256" class="checksum-val" style="font-size:10px;">--</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span>[04B] REAL-TIME ENTROPY & PASSPHRASE AUDITOR</span>
+        <span>SHANNON ENGINE</span>
+      </div>
+      <div class="panel-body">
+        <textarea id="entropy-audit-input" style="min-height: 80px;" placeholder="ENTER PASSPHRASE, KEY, OR ARBITRARY STRING TO AUDIT INFORMATION ENTROPY..."></textarea>
+        
+        <div class="btn-row">
+          <button onclick="auditEntropy()">EVALUATE ENTROPY</button>
+          <button onclick="generatePassphraseSample()">LOAD TACTICAL PASSPHRASE</button>
+          <button onclick="clearEntropyInput()">CLEAR</button>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:6px; background:#050608; border:1px solid var(--border-color); padding:10px;">
+          <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-dim);">
+            <span>INFORMATION ENTROPY STRENGTH</span>
+            <span id="entropy-eval-label" style="color:var(--accent-green); font-weight:bold;">0% (NONE)</span>
+          </div>
+          <div class="entropy-bar-wrap">
+            <div id="entropy-progress" class="entropy-bar-fill"></div>
+          </div>
+        </div>
+
+        <div class="metrics-bar" style="margin-top:auto;">
+          <div class="metric-cell">
+            <span class="label">EST. POOL BITS</span>
+            <span class="val" id="metric-entropy-bits" style="color:var(--accent-cyan)">0</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">SHANNON (B/C)</span>
+            <span class="val" id="metric-shannon-val">0.00</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">CHARSET POOL</span>
+            <span class="val" id="metric-charset-pool">0</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">AUDIT SCORE</span>
+            <span class="val" id="metric-audit-score" style="color:var(--accent-green)">WAIT</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 05: SUBNET & BITMASK MATRIX -->
+  <div class="grid" id="module-5-view" style="display: none;">
+    <div class="panel">
+      <div class="panel-header">
+        <span>[05A] CIDR / SUBNET DECOMPOSITION MATRIX</span>
+        <span id="m5-status-badge" style="color:var(--accent-green)">VALID CIDR</span>
+      </div>
+      <div class="panel-body">
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <label style="font-size:10px; color:var(--text-dim); letter-spacing:1px;">IPV4 TARGET VECTOR / CIDR PREFIX</label>
+          <input type="text" id="cidr-input" value="192.168.1.100/24" placeholder="e.g. 10.0.0.1/16, 172.16.4.1/22, 192.168.1.1/24">
+        </div>
+
+        <div class="pulse-control-grid" style="padding: 8px;">
+          <div class="ctrl-group">
+            <label>CIDR SLIDER <span class="val" id="val-cidr-slider">/24</span></label>
+            <input type="range" id="cidr-slider" min="1" max="32" value="24" oninput="onCidrSliderChange()">
+          </div>
+          <div class="ctrl-group">
+            <label>PRESET CLASS</label>
+            <select id="cidr-preset-select" onchange="applyCidrPreset()">
+              <option value="custom">TACTICAL CUSTOM</option>
+              <option value="c-24" selected>CLASS C (/24 - 256 HOSTS)</option>
+              <option value="b-16">CLASS B (/16 - 65,536 HOSTS)</option>
+              <option value="a-8">CLASS A (/8 - 16,777,216 HOSTS)</option>
+              <option value="p2p-30">POINT-TO-POINT (/30 - 4 HOSTS)</option>
+              <option value="single-32">HOST ISOLATED (/32 - 1 IP)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button onclick="setSampleCidr('10.0.0.1/16')">RFC1918 10/16</button>
+          <button onclick="setSampleCidr('172.16.10.1/23')">RFC1918 172/23</button>
+          <button onclick="setSampleCidr('192.168.1.100/24')">RFC1918 192/24</button>
+          <button onclick="copySubnetSummary()">COPY SUMMARY</button>
+        </div>
+
+        <div class="matrix-field-table">
+          <div class="matrix-row">
+            <span class="matrix-label">NETWORK IDENTIFIER (BASE)</span>
+            <span class="matrix-val" id="m5-net-id">192.168.1.0</span>
+          </div>
+          <div class="matrix-row">
+            <span class="matrix-label">BROADCAST ADDRESS</span>
+            <span class="matrix-val warn" id="m5-broadcast">192.168.1.255</span>
+          </div>
+          <div class="matrix-row">
+            <span class="matrix-label">USABLE HOST RANGE</span>
+            <span class="matrix-val highlight" id="m5-host-range">192.168.1.1 - 192.168.1.254</span>
+          </div>
+          <div class="matrix-row">
+            <span class="matrix-label">NETMASK (DOTTED DECIMAL)</span>
+            <span class="matrix-val" id="m5-netmask">255.255.255.0</span>
+          </div>
+          <div class="matrix-row">
+            <span class="matrix-label">WILDCARD / INVERSE MASK</span>
+            <span class="matrix-val" id="m5-wildcard">0.0.0.255</span>
+          </div>
+          <div class="matrix-row">
+            <span class="matrix-label">IPV4 CLASS / RESERVATION</span>
+            <span class="matrix-val" id="m5-ip-class">Class C (Private RFC1918)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span>[05B] 32-BIT BITMASK MATRIX INSPECTOR</span>
+        <span>NETWORK VS HOST OCTETS</span>
+      </div>
+      <div class="panel-body">
+        <div class="bitmask-container">
+          <div class="octet-grid-wrapper">
+            <!-- Octet 1 -->
+            <div class="octet-block">
+              <div class="octet-title">
+                <span>OCT 1</span>
+                <b id="oct1-dec">192</b>
+              </div>
+              <div class="bits-8" id="oct1-bits"></div>
+            </div>
+            <!-- Octet 2 -->
+            <div class="octet-block">
+              <div class="octet-title">
+                <span>OCT 2</span>
+                <b id="oct2-dec">168</b>
+              </div>
+              <div class="bits-8" id="oct2-bits"></div>
+            </div>
+            <!-- Octet 3 -->
+            <div class="octet-block">
+              <div class="octet-title">
+                <span>OCT 3</span>
+                <b id="oct3-dec">1</b>
+              </div>
+              <div class="bits-8" id="oct3-bits"></div>
+            </div>
+            <!-- Octet 4 -->
+            <div class="octet-block">
+              <div class="octet-title">
+                <span>OCT 4</span>
+                <b id="oct4-dec">0</b>
+              </div>
+              <div class="bits-8" id="oct4-bits"></div>
+            </div>
+          </div>
+
+          <div class="bit-legend">
+            <span><span class="legend-chip" style="background:rgba(0, 240, 255, 0.5); border:1px solid #00f0ff;"></span>NETWORK BITS (<span id="m5-net-bits-count">24</span>)</span>
+            <span><span class="legend-chip" style="background:rgba(255, 170, 0, 0.4); border:1px solid #ffaa00;"></span>HOST BITS (<span id="m5-host-bits-count">8</span>)</span>
+          </div>
+        </div>
+
+        <div class="checksum-row" style="margin-top: 4px;">
+          <div class="checksum-header">
+            <span class="alg">FULL 32-BIT BINARY BITSTREAM</span>
+            <span style="cursor:pointer;color:var(--accent-red)" onclick="copyBitstream()">[COPY]</span>
+          </div>
+          <div id="m5-binary-bitstream" class="checksum-val" style="font-size:11px; letter-spacing:1px;">--</div>
+        </div>
+
+        <div class="metrics-bar" style="margin-top:auto;">
+          <div class="metric-cell">
+            <span class="label">TOTAL HOSTS</span>
+            <span class="val" id="metric-total-hosts" style="color:var(--accent-cyan)">256</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">USABLE HOSTS</span>
+            <span class="val" id="metric-usable-hosts" style="color:var(--accent-green)">254</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">NETWORK BITS</span>
+            <span class="val" id="metric-net-bits">24</span>
+          </div>
+          <div class="metric-cell">
+            <span class="label">HOST BITS</span>
+            <span class="val" id="metric-host-bits">8</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>ARABELLANINE SECURE UTILITY // ZERO EXTERNAL NETWORK CALLS // SUITE V5.0</span>
+    <span>DISPATCHED FROM THE DIGITALLY SEALED COCKPIT</span>
+  </footer>
+
+  <script>
+    // Navigation
+    function switchModule(mod) {
+      document.getElementById('module-1-view').style.display = (mod === 1) ? 'grid' : 'none';
+      document.getElementById('module-2-view').style.display = (mod === 2) ? 'grid' : 'none';
+      document.getElementById('module-3-view').style.display = (mod === 3) ? 'grid' : 'none';
+      document.getElementById('module-4-view').style.display = (mod === 4) ? 'grid' : 'none';
+      document.getElementById('module-5-view').style.display = (mod === 5) ? 'grid' : 'none';
+      document.getElementById('tab-btn-m1').className = (mod === 1) ? 'nav-tab active' : 'nav-tab';
+      document.getElementById('tab-btn-m2').className = (mod === 2) ? 'nav-tab active' : 'nav-tab';
+      document.getElementById('tab-btn-m3').className = (mod === 3) ? 'nav-tab active' : 'nav-tab';
+      document.getElementById('tab-btn-m4').className = (mod === 4) ? 'nav-tab active' : 'nav-tab';
+      document.getElementById('tab-btn-m5').className = (mod === 5) ? 'nav-tab active' : 'nav-tab';
+      if (mod === 3 && typeof resizeScope === 'function') resizeScope();
+    }
+
+    // --- MODULE 01 LOGIC ---
+    const inputElM1 = document.getElementById('raw-input-m1');
+    const hexView = document.getElementById('hex-view');
+    const m1Chars = document.getElementById('m1-chars');
+    const m1Bytes = document.getElementById('m1-bytes');
+    const m1Entropy = document.getElementById('m1-entropy');
+    const m1Density = document.getElementById('m1-density');
+    const byteCounterM1 = document.getElementById('byte-counter-m1');
+
+    function updateM1() {
+      const text = inputElM1.value;
+      const encoder = new TextEncoder();
+      const bytes = encoder.encode(text);
+
+      m1Chars.textContent = text.length;
+      m1Bytes.textContent = bytes.length;
+      byteCounterM1.textContent = bytes.length + ' BYTES';
+
+      if (bytes.length === 0) {
+        m1Entropy.textContent = '0.00';
+        m1Density.textContent = '0%';
+        hexView.textContent = '// WAITING FOR DATA INGESTION...';
+        return;
+      }
+
+      const freq = {};
+      let ones = 0;
+      for (let i = 0; i < bytes.length; i++) {
+        const b = bytes[i];
+        freq[b] = (freq[b] || 0) + 1;
+        for (let bit = 0; bit < 8; bit++) {
+          if ((b >> bit) & 1) ones++;
+        }
+      }
+
+      let entropy = 0;
+      for (const k in freq) {
+        const p = freq[k] / bytes.length;
+        entropy -= p * Math.log2(p);
+      }
+      m1Entropy.textContent = entropy.toFixed(2);
+      m1Density.textContent = ((ones / (bytes.length * 8)) * 100).toFixed(1) + '%';
+
+      let dump = '';
+      for (let i = 0; i < bytes.length; i += 16) {
+        const chunk = bytes.slice(i, i + 16);
+        const offset = i.toString(16).padStart(6, '0').toUpperCase();
+        let hexPart = '';
+        let asciiPart = '';
+        for (let j = 0; j < 16; j++) {
+          if (j < chunk.length) {
+            hexPart += chunk[j].toString(16).padStart(2, '0').toUpperCase() + ' ';
+            const c = chunk[j];
+            asciiPart += (c >= 32 && c <= 126) ? String.fromCharCode(c) : '.';
+          } else {
+            hexPart += '   ';
+          }
+          if (j === 7) hexPart += ' ';
+        }
+        dump += `${offset}  ${hexPart} |${asciiPart}|\n`;
+      }
+      hexView.textContent = dump;
+    }
+
+    function applyTransformM1(type) {
+      const text = inputElM1.value;
+      switch (type) {
+        case 'rot13':
+          inputElM1.value = text.replace(/[a-zA-Z]/g, c => {
+            const base = c <= 'Z' ? 65 : 97;
+            return String.fromCharCode(((c.charCodeAt(0) - base + 13) % 26) + base);
+          });
+          break;
+        case 'base64-enc':
+          try { inputElM1.value = btoa(unescape(encodeURIComponent(text))); } catch(e) {}
+          break;
+        case 'base64-dec':
+          try { inputElM1.value = decodeURIComponent(escape(atob(text))); } catch(e) {}
+          break;
+        case 'url-enc':
+          inputElM1.value = encodeURIComponent(text);
+          break;
+        case 'url-dec':
+          try { inputElM1.value = decodeURI(text); } catch(e) {}
+          break;
+        case 'reverse':
+          inputElM1.value = text.split('').reverse().join('');
+          break;
+        case 'clear':
+          inputElM1.value = '';
+          break;
+      }
+      updateM1();
+    }
+
+    function generateSampleM1() {
+      inputElM1.value = 'ARABELLANINE TACTICAL PROTOCOL V1.0\n[SEALED CORE: ASTRAL_LINK_ESTABLISHED]\nEntropy injection vector: 0xDEADBEEF 0xCAFEBABE\nSTATUS: ONLINE';
+      updateM1();
+    }
+
+    function copyOutputM1(format) {
+      const encoder = new TextEncoder();
+      const bytes = encoder.encode(inputElM1.value);
+      if (format === 'hex') {
+        const hex = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(' ');
+        navigator.clipboard.writeText(hex);
+      } else if (format === 'c-array') {
+        const c = 'const uint8_t data[] = { ' + Array.from(bytes).map(b => '0x' + b.toString(16).padStart(2, '0')).join(', ') + ' };';
+        navigator.clipboard.writeText(c);
+      }
+    }
+
+    inputElM1.addEventListener('input', updateM1);
+
+    // --- MODULE 02 LOGIC ---
+    const inputElM2 = document.getElementById('raw-input-m2');
+    const byteCounterM2 = document.getElementById('byte-counter-m2');
+    const m2Bytes = document.getElementById('m2-bytes');
+    const outB64 = document.getElementById('out-b64');
+    const outB64Url = document.getElementById('out-b64url');
+    const outUrl = document.getElementById('out-url');
+    const outBin = document.getElementById('out-bin');
+    const hashSha256 = document.getElementById('hash-sha256');
+    const hashSha512 = document.getElementById('hash-sha512');
+    const hashSha1 = document.getElementById('hash-sha1');
+    const hashCrc32 = document.getElementById('hash-crc32');
+
+    const crcTable = (function() {
+      let c;
+      const table = [];
+      for (let n = 0; n < 256; n++) {
+        c = n;
+        for (let k = 0; k < 8; k++) {
+          c = ((c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1));
+        }
+        table[n] = c;
+      }
+      return table;
+    })();
+
+    function calculateCrc32(bytes) {
+      let crc = 0 ^ (-1);
+      for (let i = 0; i < bytes.length; i++) {
+        crc = (crc >>> 8) ^ crcTable[(crc ^ bytes[i]) & 0xFF];
+      }
+      return ((crc ^ (-1)) >>> 0).toString(16).padStart(8, '0').toUpperCase();
+    }
+
+    async function digestMessage(algorithm, bytes) {
+      const hashBuffer = await crypto.subtle.digest(algorithm, bytes);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function updateM2() {
+      const text = inputElM2.value;
+      const encoder = new TextEncoder();
+      const bytes = encoder.encode(text);
+
+      m2Bytes.textContent = bytes.length;
+      byteCounterM2.textContent = bytes.length + ' BYTES';
+
+      if (bytes.length === 0) {
+        outB64.textContent = '--';
+        outB64Url.textContent = '--';
+        outUrl.textContent = '--';
+        outBin.textContent = '--';
+        hashSha256.textContent = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+        hashSha512.textContent = 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e';
+        hashSha1.textContent = 'da39a3ee5e6b4b0d3255bfef95601890afd80709';
+        hashCrc32.textContent = '00000000';
+        return;
+      }
+
+      // Base64
+      let b64 = '';
+      try {
+        let binary = '';
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        b64 = btoa(binary);
+        outB64.textContent = b64;
+        outB64Url.textContent = b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      } catch (e) {
+        outB64.textContent = 'ERR';
+        outB64Url.textContent = 'ERR';
+      }
+
+      // URL
+      outUrl.textContent = encodeURIComponent(text);
+
+      // Binary bitstream
+      let bitStr = '';
+      const limit = Math.min(bytes.length, 32);
+      for (let i = 0; i < limit; i++) {
+        bitStr += bytes[i].toString(2).padStart(8, '0') + ' ';
+      }
+      if (bytes.length > 32) bitStr += `... (+${bytes.length - 32} bytes)`;
+      outBin.textContent = bitStr;
+
+      // Hashes
+      try {
+        hashSha256.textContent = await digestMessage('SHA-256', bytes);
+        hashSha512.textContent = await digestMessage('SHA-512', bytes);
+        hashSha1.textContent = await digestMessage('SHA-1', bytes);
+        hashCrc32.textContent = calculateCrc32(bytes);
+      } catch(e) {
+        console.error(e);
+      }
+    }
+
+    function generateSampleM2() {
+      inputElM2.value = JSON.stringify({
+        origin: "ARABELLANINE-TERMINAL",
+        protocol: "ASTRA-V4",
+        timestamp: Date.now(),
+        node: "MACBOOK-PRIMARY",
+        entropy: "0x7F91C80B"
+      }, null, 2);
+      updateM2();
+    }
+
+    function clearM2() {
+      inputElM2.value = '';
+      updateM2();
+    }
+
+    function syncToModule1() {
+      inputElM1.value = inputElM2.value;
+      updateM1();
+      switchModule(1);
+    }
+
+    function copyCodec(id) {
+      let text = '';
+      if (id === 'b64') text = outB64.textContent;
+      if (id === 'b64url') text = outB64Url.textContent;
+      if (id === 'url') text = outUrl.textContent;
+      if (id === 'bin') text = outBin.textContent;
+      if (text && text !== '--') navigator.clipboard.writeText(text);
+    }
+
+    function copyHash(id) {
+      let text = '';
+      if (id === 'sha256') text = hashSha256.textContent;
+      if (id === 'sha512') text = hashSha512.textContent;
+      if (id === 'sha1') text = hashSha1.textContent;
+      if (id === 'crc32') text = hashCrc32.textContent;
+      if (text) navigator.clipboard.writeText(text);
+    }
+
+    inputElM2.addEventListener('input', updateM2);
+
+    // --- MODULE 03: CHRONOMETER & AUDIO SYNTHESIS LOGIC ---
+    let chronoRunning = false;
+    let chronoStartTime = 0;
+    let chronoElapsed = 0;
+    let chronoRafId = null;
+    let laps = [];
+    let tickAudioSynced = false;
+    let lastSecondTick = 0;
+
+    const chronoTimerEl = document.getElementById('chrono-timer');
+    const chronoToggleBtn = document.getElementById('chrono-toggle-btn');
+    const chronoBadge = document.getElementById('chrono-state-badge');
+    const epochEl = document.getElementById('utc-epoch-now');
+    const lapCounterEl = document.getElementById('lap-counter');
+    const lapContainerEl = document.getElementById('lap-container');
+
+    setInterval(() => {
+      epochEl.textContent = Math.floor(Date.now() / 1000);
+    }, 1000);
+    epochEl.textContent = Math.floor(Date.now() / 1000);
+
+    function formatTime(ms) {
+      const h = Math.floor(ms / 3600000);
+      const m = Math.floor((ms % 3600000) / 60000);
+      const s = Math.floor((ms % 60000) / 1000);
+      const rem = Math.floor(ms % 1000);
+      return (
+        h.toString().padStart(2, '0') + ':' +
+        m.toString().padStart(2, '0') + ':' +
+        s.toString().padStart(2, '0') + '.' +
+        rem.toString().padStart(3, '0')
+      );
+    }
+
+    function updateChronoFrame() {
+      if (!chronoRunning) return;
+      const now = performance.now();
+      const current = chronoElapsed + (now - chronoStartTime);
+      chronoTimerEl.textContent = formatTime(current);
+
+      const currentSec = Math.floor(current / 1000);
+      if (tickAudioSynced && currentSec > lastSecondTick) {
+        lastSecondTick = currentSec;
+        fireBeep(currentSec % 60 === 0 ? 1200 : 800, 0.03, 'sine');
+      }
+
+      chronoRafId = requestAnimationFrame(updateChronoFrame);
+    }
+
+    function toggleChrono() {
+      if (chronoRunning) {
+        chronoRunning = false;
+        chronoElapsed += performance.now() - chronoStartTime;
+        cancelAnimationFrame(chronoRafId);
+        chronoToggleBtn.textContent = 'RESUME';
+        chronoBadge.textContent = 'PAUSED';
+        chronoBadge.style.color = 'var(--accent-amber)';
+      } else {
+        chronoRunning = true;
+        chronoStartTime = performance.now();
+        lastSecondTick = Math.floor(chronoElapsed / 1000);
+        chronoRafId = requestAnimationFrame(updateChronoFrame);
+        chronoToggleBtn.textContent = 'HALT';
+        chronoBadge.textContent = 'RUNNING';
+        chronoBadge.style.color = 'var(--accent-green)';
+      }
+    }
+
+    function resetChrono() {
+      chronoRunning = false;
+      cancelAnimationFrame(chronoRafId);
+      chronoElapsed = 0;
+      chronoTimerEl.textContent = '00:00:00.000';
+      chronoToggleBtn.textContent = 'START';
+      chronoBadge.textContent = 'ARMED';
+      chronoBadge.style.color = 'var(--accent-green)';
+    }
+
+    function lapChrono() {
+      const now = chronoRunning ? chronoElapsed + (performance.now() - chronoStartTime) : chronoElapsed;
+      if (now === 0) return;
+      laps.unshift({ idx: laps.length + 1, time: formatTime(now) });
+      renderLaps();
+    }
+
+    function clearLaps() {
+      laps = [];
+      renderLaps();
+    }
+
+    function renderLaps() {
+      lapCounterEl.textContent = laps.length;
+      if (laps.length === 0) {
+        lapContainerEl.innerHTML = '<div class="lap-item">// NO LAPS RECORDED</div>';
+        return;
+      }
+      lapContainerEl.innerHTML = laps.map(l => 
+        `<div class="lap-item"><span class="idx">LAP #${l.idx.toString().padStart(2, '0')}</span><span class="time">${l.time}</span></div>`
+      ).join('');
+    }
+
+    function syncChronoBeep() {
+      tickAudioSynced = !tickAudioSynced;
+      ensureAudioContext();
+      alert(tickAudioSynced ? 'TICK AUDIO SYNC: ENABLED' : 'TICK AUDIO SYNC: DISABLED');
+    }
+
+    // --- WEB AUDIO API ENGINE ---
+    let audioCtx = null;
+    let beaconOsc = null;
+    let beaconGain = null;
+    let beaconTimer = null;
+    let beaconActive = false;
+    let analyserNode = null;
+
+    const scopeCanvas = document.getElementById('scope-canvas');
+    const scopeCtx = scopeCanvas.getContext('2d');
+    const audioEngineStateEl = document.getElementById('audio-engine-state');
+    const audioSampleRateEl = document.getElementById('audio-sample-rate');
+    const valFreqEl = document.getElementById('val-freq');
+    const valBpmEl = document.getElementById('val-bpm');
+    const valGainEl = document.getElementById('val-gain');
+
+    function ensureAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContextClass();
+        analyserNode = audioCtx.createAnalyser();
+        analyserNode.fftSize = 256;
+        analyserNode.connect(audioCtx.destination);
+        audioSampleRateEl.textContent = audioCtx.sampleRate + ' HZ';
+        drawOscilloscope();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      audioEngineStateEl.textContent = audioCtx.state.toUpperCase();
+      audioEngineStateEl.style.color = 'var(--accent-green)';
+    }
+
+    function updateAudioParams() {
+      const freq = document.getElementById('param-freq').value;
+      const gain = document.getElementById('param-gain').value;
+      valFreqEl.textContent = freq + ' HZ';
+      valGainEl.textContent = gain + '%';
+      if (beaconOsc) {
+        beaconOsc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        beaconOsc.type = document.getElementById('param-wave').value;
+      }
+      if (beaconGain) {
+        beaconGain.gain.setValueAtTime(gain / 100, audioCtx.currentTime);
+      }
+    }
+
+    function updateBpm() {
+      const bpm = document.getElementById('param-bpm').value;
+      valBpmEl.textContent = bpm + ' BPM';
+      if (beaconActive) {
+        clearInterval(beaconTimer);
+        const interval = (60 / bpm) * 1000;
+        beaconTimer = setInterval(triggerPulseBeat, interval);
+      }
+    }
+
+    function fireBeep(freq, duration, type) {
+      ensureAudioContext();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const masterVol = (document.getElementById('param-gain').value / 100) || 0.15;
+
+      osc.type = type || document.getElementById('param-wave').value;
+      osc.frequency.setValueAtTime(freq || document.getElementById('param-freq').value, audioCtx.currentTime);
+      
+      gain.gain.setValueAtTime(masterVol, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+
+      osc.connect(gain);
+      gain.connect(analyserNode);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function triggerPulseBeat() {
+      const freq = parseFloat(document.getElementById('param-freq').value);
+      const wave = document.getElementById('param-wave').value;
+      fireBeep(freq, 0.08, wave);
+    }
+
+    function togglePulse() {
+      ensureAudioContext();
+      const btn = document.getElementById('pulse-btn');
+      if (beaconActive) {
+        clearInterval(beaconTimer);
+        beaconActive = false;
+        btn.textContent = 'START AUDIO BEACON';
+        btn.classList.remove('active');
+      } else {
+        beaconActive = true;
+        const bpm = parseFloat(document.getElementById('param-bpm').value);
+        const interval = (60 / bpm) * 1000;
+        triggerPulseBeat();
+        beaconTimer = setInterval(triggerPulseBeat, interval);
+        btn.textContent = 'HALT AUDIO BEACON';
+        btn.classList.add('active');
+      }
+    }
+
+    function drawOscilloscope() {
+      requestAnimationFrame(drawOscilloscope);
+      if (!analyserNode) return;
+
+      const bufferLength = analyserNode.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      analyserNode.getByteTimeDomainData(dataArray);
+
+      scopeCtx.fillStyle = '#040507';
+      scopeCtx.fillRect(0, 0, scopeCanvas.width, scopeCanvas.height);
+
+      scopeCtx.lineWidth = 1.5;
+      scopeCtx.strokeStyle = '#00f0ff';
+      scopeCtx.beginPath();
+
+      const sliceWidth = scopeCanvas.width * 1.0 / bufferLength;
+      let x = 0;
+
+      for (let i = 0; i < bufferLength; i++) {
+        const v = dataArray[i] / 128.0;
+        const y = v * (scopeCanvas.height / 2);
+
+        if (i === 0) scopeCtx.moveTo(x, y);
+        else scopeCtx.lineTo(x, y);
+
+        x += sliceWidth;
+      }
+
+      scopeCtx.lineTo(scopeCanvas.width, scopeCanvas.height / 2);
+      scopeCtx.stroke();
+    }
+
+    function resizeScope() {
+      if (!scopeCanvas) return;
+      scopeCanvas.width = scopeCanvas.clientWidth;
+      scopeCanvas.height = scopeCanvas.clientHeight;
+    }
+    window.addEventListener('resize', resizeScope);
+    resizeScope();
+
+    // --- MODULE 04: ENTROPY & SECURE TOKEN GENERATOR LOGIC ---
+    const tokenBytesSlider = document.getElementById('token-bytes-slider');
+    const valTokenLenEl = document.getElementById('val-token-len');
+    const tokenFormatSelect = document.getElementById('token-format-select');
+    const tokenOutputVal = document.getElementById('token-output-val');
+    const tokenFormatLabel = document.getElementById('token-format-label');
+    const tokenSha256El = document.getElementById('token-sha256');
+
+    function updateTokenLength() {
+      const bytes = tokenBytesSlider.value;
+      valTokenLenEl.textContent = `${bytes} BYTES (${bytes * 8}-BIT)`;
+      generateTokens();
+    }
+
+    async function hashTokenValue(str) {
+      if (!str || str === '--') {
+        tokenSha256El.textContent = '--';
+        return;
+      }
+      const enc = new TextEncoder();
+      const digest = await crypto.subtle.digest('SHA-256', enc.encode(str));
+      const arr = Array.from(new Uint8Array(digest));
+      tokenSha256El.textContent = arr.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function generateTokens() {
+      const numBytes = parseInt(tokenBytesSlider.value, 10);
+      const format = tokenFormatSelect.value;
+      const array = new Uint8Array(numBytes);
+      crypto.getRandomValues(array);
+
+      let token = '';
+      if (format === 'hex') {
+        token = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
+        tokenFormatLabel.textContent = `HEX (${numBytes * 8}-BIT)`;
+      } else if (format === 'hex-upper') {
+        token = Array.from(array).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join('');
+        tokenFormatLabel.textContent = `HEX-UPPER (${numBytes * 8}-BIT)`;
+      } else if (format === 'base64') {
+        let binary = '';
+        for (let i = 0; i < array.length; i++) binary += String.fromCharCode(array[i]);
+        token = btoa(binary);
+        tokenFormatLabel.textContent = `BASE64 (${token.length} CHARS)`;
+      } else if (format === 'base64url') {
+        let binary = '';
+        for (let i = 0; i < array.length; i++) binary += String.fromCharCode(array[i]);
+        token = btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        tokenFormatLabel.textContent = `BASE64URL SAFE (${token.length} CHARS)`;
+      } else if (format === 'alphanumeric') {
+        const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const mask = charset.length;
+        let res = '';
+        for (let i = 0; i < numBytes; i++) {
+          res += charset[array[i] % mask];
+        }
+        token = res;
+        tokenFormatLabel.textContent = `ALPHANUMERIC (${numBytes} CHARS)`;
+      }
+
+      tokenOutputVal.textContent = token;
+      hashTokenValue(token);
+    }
+
+    function generateUuidV4() {
+      const uuid = (crypto.randomUUID) ? crypto.randomUUID() : 'NATIVE-UUID-UNAVAILABLE';
+      tokenOutputVal.textContent = uuid;
+      tokenFormatLabel.textContent = 'UUID v4 (RFC 4122)';
+      hashTokenValue(uuid);
+    }
+
+    function copyCurrentToken() {
+      const text = tokenOutputVal.textContent;
+      if (text && text !== '--') navigator.clipboard.writeText(text);
+    }
+
+    function copyTokenHash() {
+      const text = tokenSha256El.textContent;
+      if (text && text !== '--') navigator.clipboard.writeText(text);
+    }
+
+    function pipeTokenToDigest() {
+      const text = tokenOutputVal.textContent;
+      if (!text || text === '--') return;
+      inputElM2.value = text;
+      updateM2();
+      switchModule(2);
+    }
+
+    // Entropy Auditor
+    const auditInputEl = document.getElementById('entropy-audit-input');
+    const entropyProgress = document.getElementById('entropy-progress');
+    const entropyEvalLabel = document.getElementById('entropy-eval-label');
+    const metricEntropyBits = document.getElementById('metric-entropy-bits');
+    const metricShannonVal = document.getElementById('metric-shannon-val');
+    const metricCharsetPool = document.getElementById('metric-charset-pool');
+    const metricAuditScore = document.getElementById('metric-audit-score');
+
+    function auditEntropy() {
+      const str = auditInputEl.value;
+      if (!str) {
+        entropyProgress.style.width = '0%';
+        entropyEvalLabel.textContent = '0% (NONE)';
+        metricEntropyBits.textContent = '0';
+        metricShannonVal.textContent = '0.00';
+        metricCharsetPool.textContent = '0';
+        metricAuditScore.textContent = 'WAIT';
+        metricAuditScore.style.color = 'var(--text-dim)';
+        return;
+      }
+
+      let pool = 0;
+      if (/[a-z]/.test(str)) pool += 26;
+      if (/[A-Z]/.test(str)) pool += 26;
+      if (/[0-9]/.test(str)) pool += 10;
+      if (/[^a-zA-Z0-9]/.test(str)) pool += 33;
+
+      const totalBits = Math.floor(str.length * (pool > 0 ? Math.log2(pool) : 0));
+
+      const freq = {};
+      for (let i = 0; i < str.length; i++) {
+        const c = str[i];
+        freq[c] = (freq[c] || 0) + 1;
+      }
+      let shannon = 0;
+      for (const k in freq) {
+        const p = freq[k] / str.length;
+        shannon -= p * Math.log2(p);
+      }
+
+      metricEntropyBits.textContent = totalBits;
+      metricShannonVal.textContent = shannon.toFixed(2);
+      metricCharsetPool.textContent = pool;
+
+      let pct = Math.min(Math.round((totalBits / 128) * 100), 100);
+      entropyProgress.style.width = pct + '%';
+
+      if (totalBits < 40) {
+        entropyProgress.style.background = 'var(--accent-red)';
+        entropyEvalLabel.textContent = `${pct}% (VULNERABLE / WEAK)`;
+        entropyEvalLabel.style.color = 'var(--accent-red)';
+        metricAuditScore.textContent = 'WEAK';
+        metricAuditScore.style.color = 'var(--accent-red)';
+      } else if (totalBits < 75) {
+        entropyProgress.style.background = 'var(--accent-amber)';
+        entropyEvalLabel.textContent = `${pct}% (MODERATE DEFENSE)`;
+        entropyEvalLabel.style.color = 'var(--accent-amber)';
+        metricAuditScore.textContent = 'FAIR';
+        metricAuditScore.style.color = 'var(--accent-amber)';
+      } else if (totalBits < 120) {
+        entropyProgress.style.background = 'var(--accent-cyan)';
+        entropyEvalLabel.textContent = `${pct}% (STRONG MIL-SPEC)`;
+        entropyEvalLabel.style.color = 'var(--accent-cyan)';
+        metricAuditScore.textContent = 'STRONG';
+        metricAuditScore.style.color = 'var(--accent-cyan)';
+      } else {
+        entropyProgress.style.background = 'var(--accent-green)';
+        entropyEvalLabel.textContent = `${pct}% (CRYPTOGRAPHIC MAXIMUM)`;
+        entropyEvalLabel.style.color = 'var(--accent-green)';
+        metricAuditScore.textContent = 'HARDENED';
+        metricAuditScore.style.color = 'var(--accent-green)';
+      }
+    }
+
+    function generatePassphraseSample() {
+      const words = ["ASTRAL", "RELIQUARY", "CIPHER", "PHANTOM", "PROTOCOL", "GRID", "TERMINAL", "MECHA", "SENTINEL", "PURGATORY"];
+      const array = new Uint32Array(4);
+      crypto.getRandomValues(array);
+      const pass = `${words[array[0] % words.length]}-${words[array[1] % words.length]}-${words[array[2] % words.length]}-${array[3] % 1000}`;
+      auditInputEl.value = pass;
+      auditEntropy();
+    }
+
+    function clearEntropyInput() {
+      auditInputEl.value = '';
+      auditEntropy();
+    }
+
+    auditInputEl.addEventListener('input', auditEntropy);
+
+    // --- MODULE 05: SUBNET & BITMASK MATRIX LOGIC ---
+    const cidrInput = document.getElementById('cidr-input');
+    const cidrSlider = document.getElementById('cidr-slider');
+    const valCidrSlider = document.getElementById('val-cidr-slider');
+    const cidrPresetSelect = document.getElementById('cidr-preset-select');
+    const m5StatusBadge = document.getElementById('m5-status-badge');
+
+    const m5NetId = document.getElementById('m5-net-id');
+    const m5Broadcast = document.getElementById('m5-broadcast');
+    const m5HostRange = document.getElementById('m5-host-range');
+    const m5Netmask = document.getElementById('m5-netmask');
+    const m5Wildcard = document.getElementById('m5-wildcard');
+    const m5IpClass = document.getElementById('m5-ip-class');
+
+    const oct1Dec = document.getElementById('oct1-dec');
+    const oct2Dec = document.getElementById('oct2-dec');
+    const oct3Dec = document.getElementById('oct3-dec');
+    const oct4Dec = document.getElementById('oct4-dec');
+
+    const oct1Bits = document.getElementById('oct1-bits');
+    const oct2Bits = document.getElementById('oct2-bits');
+    const oct3Bits = document.getElementById('oct3-bits');
+    const oct4Bits = document.getElementById('oct4-bits');
+
+    const m5NetBitsCount = document.getElementById('m5-net-bits-count');
+    const m5HostBitsCount = document.getElementById('m5-host-bits-count');
+    const m5BinaryBitstream = document.getElementById('m5-binary-bitstream');
+
+    const metricTotalHosts = document.getElementById('metric-total-hosts');
+    const metricUsableHosts = document.getElementById('metric-usable-hosts');
+    const metricNetBits = document.getElementById('metric-net-bits');
+    const metricHostBits = document.getElementById('metric-host-bits');
+
+    function intToIpv4(intVal) {
+      return [
+        (intVal >>> 24) & 255,
+        (intVal >>> 16) & 255,
+        (intVal >>> 8) & 255,
+        intVal & 255
+      ].join('.');
+    }
+
+    function ipv4ToInt(ipStr) {
+      const parts = ipStr.trim().split('.');
+      if (parts.length !== 4) return null;
+      let res = 0;
+      for (let i = 0; i < 4; i++) {
+        const n = parseInt(parts[i], 10);
+        if (isNaN(n) || n < 0 || n > 255) return null;
+        res = (res << 8) | n;
+      }
+      return res >>> 0;
+    }
+
+    function formatNumberCommas(x) {
+      return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    function getIpClassDesc(ipInt) {
+      const firstOctet = (ipInt >>> 24) & 255;
+      const secondOctet = (ipInt >>> 16) & 255;
+
+      // RFC 1918 Private ranges
+      let priv = false;
+      if (firstOctet === 10) priv = true;
+      if (firstOctet === 172 && secondOctet >= 16 && secondOctet <= 31) priv = true;
+      if (firstOctet === 192 && secondOctet === 168) priv = true;
+      if (firstOctet === 127) return 'Loopback (127.0.0.0/8)';
+
+      let cls = 'Class A';
+      if (firstOctet >= 128 && firstOctet <= 191) cls = 'Class B';
+      else if (firstOctet >= 192 && firstOctet <= 223) cls = 'Class C';
+      else if (firstOctet >= 224 && firstOctet <= 239) cls = 'Class D (Multicast)';
+      else if (firstOctet >= 240) cls = 'Class E (Reserved)';
+
+      return `${cls}${priv ? ' [RFC1918 Private]' : ' [Public Internet]'}`;
+    }
+
+    function renderOctetBits(container, octetValue, netBitsInOctet) {
+      container.innerHTML = '';
+      for (let bitIdx = 7; bitIdx >= 0; bitIdx--) {
+        const bitVal = (octetValue >> bitIdx) & 1;
+        const bitOrderFromLeft = 7 - bitIdx;
+        const isNet = bitOrderFromLeft < netBitsInOctet;
+
+        const cell = document.createElement('div');
+        cell.className = 'bit-cell ' + (isNet ? 'net-bit' : 'host-bit');
+        cell.textContent = bitVal;
+        container.appendChild(cell);
+      }
+    }
+
+    function updateM5() {
+      const raw = cidrInput.value.trim();
+      const parts = raw.split('/');
+      const ipStr = parts[0];
+      let cidr = parts.length > 1 ? parseInt(parts[1], 10) : parseInt(cidrSlider.value, 10);
+
+      if (isNaN(cidr) || cidr < 0 || cidr > 32) cidr = 24;
+
+      const ipInt = ipv4ToInt(ipStr);
+      if (ipInt === null) {
+        m5StatusBadge.textContent = 'INVALID IP FORMAT';
+        m5StatusBadge.style.color = 'var(--accent-red)';
+        return;
+      }
+
+      m5StatusBadge.textContent = 'VALID CIDR';
+      m5StatusBadge.style.color = 'var(--accent-green)';
+
+      cidrSlider.value = cidr;
+      valCidrSlider.textContent = `/${cidr}`;
+
+      const maskInt = cidr === 0 ? 0 : ((0xFFFFFFFF << (32 - cidr)) >>> 0);
+      const wildcardInt = (~maskInt) >>> 0;
+      const netInt = (ipInt & maskInt) >>> 0;
+      const bcastInt = (netInt | wildcardInt) >>> 0;
+
+      const totalHosts = Math.pow(2, 32 - cidr);
+      let usableHosts = 0;
+      let firstHostInt = netInt;
+      let lastHostInt = bcastInt;
+
+      if (cidr === 32) {
+        usableHosts = 1;
+        firstHostInt = netInt;
+        lastHostInt = netInt;
+      } else if (cidr === 31) {
+        usableHosts = 2; // RFC 3021
+        firstHostInt = netInt;
+        lastHostInt = bcastInt;
+      } else {
+        usableHosts = Math.max(0, totalHosts - 2);
+        firstHostInt = (netInt + 1) >>> 0;
+        lastHostInt = (bcastInt - 1) >>> 0;
+      }
+
+      m5NetId.textContent = intToIpv4(netInt);
+      m5Broadcast.textContent = cidr >= 31 ? 'N/A (RFC 3021/32)' : intToIpv4(bcastInt);
+      m5HostRange.textContent = `${intToIpv4(firstHostInt)} - ${intToIpv4(lastHostInt)}`;
+      m5Netmask.textContent = intToIpv4(maskInt);
+      m5Wildcard.textContent = intToIpv4(wildcardInt);
+      m5IpClass.textContent = getIpClassDesc(ipInt);
+
+      metricTotalHosts.textContent = formatNumberCommas(totalHosts);
+      metricUsableHosts.textContent = formatNumberCommas(usableHosts);
+      metricNetBits.textContent = cidr;
+      metricHostBits.textContent = 32 - cidr;
+      m5NetBitsCount.textContent = cidr;
+      m5HostBitsCount.textContent = 32 - cidr;
+
+      // Octet representations
+      const o1 = (ipInt >>> 24) & 255;
+      const o2 = (ipInt >>> 16) & 255;
+      const o3 = (ipInt >>> 8) & 255;
+      const o4 = ipInt & 255;
+
+      oct1Dec.textContent = o1;
+      oct2Dec.textContent = o2;
+      oct3Dec.textContent = o3;
+      oct4Dec.textContent = o4;
+
+      const net1 = Math.min(8, Math.max(0, cidr - 0));
+      const net2 = Math.min(8, Math.max(0, cidr - 8));
+      const net3 = Math.min(8, Math.max(0, cidr - 16));
+      const net4 = Math.min(8, Math.max(0, cidr - 24));
+
+      renderOctetBits(oct1Bits, o1, net1);
+      renderOctetBits(oct2Bits, o2, net2);
+      renderOctetBits(oct3Bits, o3, net3);
+      renderOctetBits(oct4Bits, o4, net4);
+
+      // Binary bitstream format
+      const b1 = o1.toString(2).padStart(8, '0');
+      const b2 = o2.toString(2).padStart(8, '0');
+      const b3 = o3.toString(2).padStart(8, '0');
+      const b4 = o4.toString(2).padStart(8, '0');
+      m5BinaryBitstream.textContent = `${b1}.${b2}.${b3}.${b4}`;
+    }
+
+    function onCidrSliderChange() {
+      const cidr = cidrSlider.value;
+      valCidrSlider.textContent = `/${cidr}`;
+      const current = cidrInput.value.trim().split('/')[0];
+      cidrInput.value = `${current}/${cidr}`;
+      updateM5();
+    }
+
+    function applyCidrPreset() {
+      const mode = cidrPresetSelect.value;
+      const currentIp = cidrInput.value.trim().split('/')[0] || '192.168.1.1';
+      if (mode === 'c-24') cidrInput.value = `${currentIp}/24`;
+      else if (mode === 'b-16') cidrInput.value = `${currentIp}/16`;
+      else if (mode === 'a-8') cidrInput.value = `${currentIp}/8`;
+      else if (mode === 'p2p-30') cidrInput.value = `${currentIp}/30`;
+      else if (mode === 'single-32') cidrInput.value = `${currentIp}/32`;
+      updateM5();
+    }
+
+    function setSampleCidr(sample) {
+      cidrInput.value = sample;
+      updateM5();
+    }
+
+    function copySubnetSummary() {
+      const text = [
+        `TARGET: ${cidrInput.value}`,
+        `NETWORK ID: ${m5NetId.textContent}`,
+        `BROADCAST: ${m5Broadcast.textContent}`,
+        `USABLE HOSTS: ${m5HostRange.textContent} (${metricUsableHosts.textContent} hosts)`,
+        `NETMASK: ${m5Netmask.textContent}`,
+        `WILDCARD: ${m5Wildcard.textContent}`,
+        `BINARY: ${m5BinaryBitstream.textContent}`
+      ].join('\n');
+      navigator.clipboard.writeText(text);
+    }
+
+    function copyBitstream() {
+      const text = m5BinaryBitstream.textContent;
+      if (text && text !== '--') navigator.clipboard.writeText(text);
+    }
+
+    cidrInput.addEventListener('input', updateM5);
+
+    // Initializations
+    generateTokens();
+    updateM5();
+  </script>
+</body>
+</html>
