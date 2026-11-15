@@ -248,7 +248,7 @@
       <span class="brand-title">TACTICAL TERMINAL</span>
     </div>
     <div class="hud-metrics">
-      <div>SUITE: <span>7/7 ONLINE</span></div>
+      <div>SUITE: <span>8/8 ONLINE</span></div>
       <div>CORE: <span>ZERO-BLOAT</span></div>
       <div>SEC: <span>ISOLATED</span></div>
     </div>
@@ -262,6 +262,7 @@
     <button class="nav-btn" onclick="switchTab('m5')"><span>05</span> SUBNET <span class="badge">CIDR</span></button>
     <button class="nav-btn" onclick="switchTab('m6')"><span>06</span> RADIX CONV <span class="badge">MATH</span></button>
     <button class="nav-btn" onclick="switchTab('m7')"><span>07</span> HASH DIGEST <span class="badge">CRYPTO</span></button>
+    <button class="nav-btn" onclick="switchTab('m8')"><span>08</span> REGEX MATRIX <span class="badge">PARSER</span></button>
   </nav>
 
   <main>
@@ -502,6 +503,63 @@
         </div>
       </div>
     </section>
+
+    <!-- MODULE 08 -->
+    <section id="m8" class="module-view">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">MODULE 08 // TACTICAL REGEX MATRIX &amp; CAPTURE INSPECTOR</div>
+          <div id="m8-status-badge" style="font-size:10px; color:var(--text-muted);">INITIALIZING</div>
+        </div>
+        
+        <div class="grid-2">
+          <div>
+            <div class="output-label">REGULAR EXPRESSION PATTERN</div>
+            <input id="regex-pattern" value="(?<proto>https?)://(?<domain>[a-zA-Z0-9.-]+)(?<path>/[^\s]*)?" placeholder="Enter regex pattern...">
+            
+            <div style="margin-top:10px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; background:#06070a; border:1px solid var(--border-color); padding:6px 10px;">
+              <span style="font-size:10px; color:var(--accent-amber); font-weight:bold;">FLAGS:</span>
+              <label style="font-size:11px; display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" id="regex-flag-g" checked style="width:auto;"> g (global)</label>
+              <label style="font-size:11px; display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" id="regex-flag-i" checked style="width:auto;"> i (case-ins)</label>
+              <label style="font-size:11px; display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" id="regex-flag-m" checked style="width:auto;"> m (multiline)</label>
+              <label style="font-size:11px; display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" id="regex-flag-s" style="width:auto;"> s (dotAll)</label>
+              <label style="font-size:11px; display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" id="regex-flag-u" style="width:auto;"> u (unicode)</label>
+            </div>
+
+            <div class="btn-group" style="margin-top:10px;">
+              <span style="font-size:10px; color:var(--text-muted); align-self:center; margin-right:4px;">PRESETS:</span>
+              <button class="btn" onclick="loadRegexPreset('ipv4')">IPv4</button>
+              <button class="btn" onclick="loadRegexPreset('email')">Email</button>
+              <button class="btn" onclick="loadRegexPreset('jwt')">JWT</button>
+              <button class="btn" onclick="loadRegexPreset('groups')">Telemetry</button>
+            </div>
+          </div>
+
+          <div>
+            <div class="output-label">TEST PAYLOAD BUFFER</div>
+            <textarea id="regex-test-text" placeholder="Enter target text string to evaluate..." style="min-height:92px;">Tactical terminal telemetry online at https://arabellanine.github.io/tactical-terminal/index.html with backup relay at http://192.168.1.1/api/v1/recon.</textarea>
+            <div style="margin-top:8px;" class="hud-metrics">
+              <div>MATCHES: <span id="m8-metric-matches">0</span></div>
+              <div>EXEC TIME: <span id="m8-metric-time">0.00ms</span></div>
+              <div>NATIVE: <span>RegExp API</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;" class="grid-2">
+          <div>
+            <div class="output-label">LIVE MATCH HIGHLIGHT BUFFER</div>
+            <div id="regex-highlight-view" class="output-block" style="min-height:120px; white-space:pre-wrap; line-height:1.6; font-size:12px;">--</div>
+          </div>
+          <div>
+            <div class="output-label">EXTRACTED CAPTURE GROUPS &amp; TOKENS</div>
+            <div id="regex-groups-list" class="output-block" style="min-height:120px; max-height:240px; overflow-y:auto; font-family:var(--font-mono);">
+              <div style="color:var(--text-muted); font-size:11px;">// AWAITING EVALUATION</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer>
@@ -509,6 +567,7 @@
     <div>AUTONOMOUS VIGIL RECON // NOVEMBER 2026</div>
   </footer>
 
+  <script src="module-08-regex-matrix.js"></script>
   <script>
     // TAB CONTROLLER
     function switchTab(modId) {
@@ -517,7 +576,7 @@
       const target = document.getElementById(modId);
       if (target) target.classList.add('active');
       
-      const idx = ['m1','m2','m3','m4','m5','m6','m7'].indexOf(modId);
+      const idx = ['m1','m2','m3','m4','m5','m6','m7','m8'].indexOf(modId);
       if (idx !== -1 && document.querySelectorAll('.nav-btn')[idx]) {
         document.querySelectorAll('.nav-btn')[idx].classList.add('active');
       }
@@ -792,6 +851,9 @@
       calcSubnet();
       initModule06();
       initModule07();
+      if (typeof initModule08 === 'function') {
+        initModule08();
+      }
     });
   </script>
 </body>
