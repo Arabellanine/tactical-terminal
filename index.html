@@ -207,7 +207,9 @@
     .btn-group { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
 
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
     .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .grid-5 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
 
     .output-block {
       background: #050608;
@@ -248,7 +250,7 @@
       <span class="brand-title">TACTICAL TERMINAL</span>
     </div>
     <div class="hud-metrics">
-      <div>SUITE: <span>9/9 ONLINE</span></div>
+      <div>SUITE: <span>10/10 ONLINE</span></div>
       <div>CORE: <span>ZERO-BLOAT</span></div>
       <div>SEC: <span>ISOLATED</span></div>
     </div>
@@ -264,6 +266,7 @@
     <button class="nav-btn" onclick="switchTab('m7')"><span>07</span> HASH DIGEST <span class="badge">CRYPTO</span></button>
     <button class="nav-btn" onclick="switchTab('m8')"><span>08</span> REGEX MATRIX <span class="badge">PARSER</span></button>
     <button class="nav-btn" onclick="switchTab('m9')"><span>09</span> JSON LENS <span class="badge">TREE</span></button>
+    <button class="nav-btn" onclick="switchTab('m10')"><span>10</span> URL MATRIX <span class="badge">URI</span></button>
   </nav>
 
   <main>
@@ -613,6 +616,99 @@
         </div>
       </div>
     </section>
+
+    <!-- MODULE 10 -->
+    <section id="m10" class="module-view">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">MODULE 10 // TACTICAL URL &amp; QUERY PARAM MATRIX</div>
+          <div id="m10-status-badge" style="font-size:10px; color:var(--text-muted);">STANDBY</div>
+        </div>
+
+        <div>
+          <div class="output-label">TARGET URL / URI BUFFER</div>
+          <input id="url-input" value="https://arabellanine.github.io/tactical-terminal/index.html?node=arabella-mac&amp;mode=stealth&amp;sig=0xdeadbeef&amp;retry=3#sector-09" placeholder="Enter target URL or query string...">
+          <div class="btn-group" style="margin-top:8px;">
+            <button class="btn" onclick="loadUrlPresetM10('telemetry')">Preset: Telemetry</button>
+            <button class="btn" onclick="loadUrlPresetM10('auth')">Preset: OAuth</button>
+            <button class="btn" onclick="loadUrlPresetM10('api')">Preset: REST API</button>
+          </div>
+          <div style="margin-top:8px;" class="hud-metrics">
+            <div>SCHEME: <span id="m10-metric-proto">HTTPS</span></div>
+            <div>HOST: <span id="m10-metric-host">arabellanine.github.io</span></div>
+            <div>PARAMS COUNT: <span id="m10-metric-params">4</span></div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;" class="grid-5">
+          <div class="output-block">
+            <div class="output-label">PROTOCOL</div>
+            <div id="url-comp-proto" class="output-val" style="font-size:12px;">https:</div>
+          </div>
+          <div class="output-block">
+            <div class="output-label">HOSTNAME</div>
+            <div id="url-comp-host" class="output-val" style="font-size:12px;">arabellanine.github.io</div>
+          </div>
+          <div class="output-block">
+            <div class="output-label">PORT</div>
+            <div id="url-comp-port" class="output-val" style="font-size:12px;">(default)</div>
+          </div>
+          <div class="output-block">
+            <div class="output-label">PATHNAME</div>
+            <div id="url-comp-path" class="output-val" style="font-size:12px;">/tactical-terminal/index.html</div>
+          </div>
+          <div class="output-block">
+            <div class="output-label">HASH / FRAGMENT</div>
+            <div id="url-comp-hash" class="output-val" style="font-size:12px;">#sector-09</div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;" class="grid-2">
+          <div>
+            <div class="output-label" style="display:flex; justify-content:space-between;">
+              <span>PARSED QUERY PARAMETERS MATRIX</span>
+              <span style="color:var(--text-muted); font-size:10px;">CLICK DEL OR ADD KEY/VAL</span>
+            </div>
+            <div class="output-block" style="min-height:160px; max-height:260px; overflow-y:auto; padding:0;">
+              <table style="width:100%; border-collapse:collapse; font-size:11px; text-align:left;">
+                <thead>
+                  <tr style="border-bottom:1px solid var(--border-color); background:rgba(255,255,255,0.02); color:var(--text-muted);">
+                    <th style="padding:6px 8px; width:30px;">#</th>
+                    <th style="padding:6px 8px; width:35%;">KEY</th>
+                    <th style="padding:6px 8px;">VALUE</th>
+                    <th style="padding:6px 8px; text-align:right; width:90px;">ACTION</th>
+                  </tr>
+                </thead>
+                <tbody id="url-query-body">
+                  <!-- Injected via module-10-url-matrix.js -->
+                </tbody>
+              </table>
+            </div>
+
+            <div style="margin-top:8px; display:flex; gap:6px;">
+              <input id="url-new-key" placeholder="Key (e.g. token)" style="flex:1;">
+              <input id="url-new-val" placeholder="Value (e.g. 99a1)" style="flex:1;">
+              <button class="btn" onclick="addQueryParamM10()">+ Append Param</button>
+            </div>
+          </div>
+
+          <div>
+            <div class="output-label">STANDALONE URI CODEC (ENCODE / DECODE)</div>
+            <textarea id="url-codec-input" placeholder="Type or paste payload to URL encode or decode..." style="min-height:90px;">Tactical token with spaces &amp; symbols: key=alpha+beta/delta?sig=100%</textarea>
+            <div class="btn-group" style="margin-top:6px;">
+              <button class="btn" onclick="runUrlCodecM10('encode')">encodeURIComponent</button>
+              <button class="btn" onclick="runUrlCodecM10('decode')">decodeURIComponent</button>
+              <button class="btn" onclick="runUrlCodecM10('encodeUri')">encodeURI</button>
+              <button class="btn" onclick="runUrlCodecM10('decodeUri')">decodeURI</button>
+            </div>
+            <div style="margin-top:10px;" class="output-block">
+              <div class="output-label">CODEC OUTPUT BUFFER</div>
+              <div id="url-codec-output" class="output-val" style="font-size:12px;">--</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer>
@@ -622,6 +718,7 @@
 
   <script src="module-08-regex-matrix.js"></script>
   <script src="module-09-json-lens.js"></script>
+  <script src="module-10-url-matrix.js"></script>
   <script>
     // TAB CONTROLLER
     function switchTab(modId) {
@@ -630,7 +727,7 @@
       const target = document.getElementById(modId);
       if (target) target.classList.add('active');
       
-      const idx = ['m1','m2','m3','m4','m5','m6','m7','m8','m9'].indexOf(modId);
+      const idx = ['m1','m2','m3','m4','m5','m6','m7','m8','m9','m10'].indexOf(modId);
       if (idx !== -1 && document.querySelectorAll('.nav-btn')[idx]) {
         document.querySelectorAll('.nav-btn')[idx].classList.add('active');
       }
@@ -910,6 +1007,9 @@
       }
       if (typeof initModule09 === 'function') {
         initModule09();
+      }
+      if (typeof initModule10 === 'function') {
+        initModule10();
       }
     });
   </script>
