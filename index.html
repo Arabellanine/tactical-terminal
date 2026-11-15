@@ -248,7 +248,7 @@
       <span class="brand-title">TACTICAL TERMINAL</span>
     </div>
     <div class="hud-metrics">
-      <div>SUITE: <span>8/8 ONLINE</span></div>
+      <div>SUITE: <span>9/9 ONLINE</span></div>
       <div>CORE: <span>ZERO-BLOAT</span></div>
       <div>SEC: <span>ISOLATED</span></div>
     </div>
@@ -263,6 +263,7 @@
     <button class="nav-btn" onclick="switchTab('m6')"><span>06</span> RADIX CONV <span class="badge">MATH</span></button>
     <button class="nav-btn" onclick="switchTab('m7')"><span>07</span> HASH DIGEST <span class="badge">CRYPTO</span></button>
     <button class="nav-btn" onclick="switchTab('m8')"><span>08</span> REGEX MATRIX <span class="badge">PARSER</span></button>
+    <button class="nav-btn" onclick="switchTab('m9')"><span>09</span> JSON LENS <span class="badge">TREE</span></button>
   </nav>
 
   <main>
@@ -560,6 +561,58 @@
         </div>
       </div>
     </section>
+
+    <!-- MODULE 09 -->
+    <section id="m9" class="module-view">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">MODULE 09 // TACTICAL JSON LENS &amp; TREE INSPECTOR</div>
+          <div id="m9-status-badge" style="font-size:10px; color:var(--text-muted);">STANDBY</div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <div class="output-label">JSON PAYLOAD BUFFER</div>
+            <textarea id="json-input" placeholder="Paste or type raw JSON..." style="min-height:140px;">{
+  "system": "TACTICAL_TERMINAL",
+  "version": "0.9.0",
+  "node": "arabellanine-mac",
+  "status": "ACTIVE",
+  "metrics": {
+    "uptime_seconds": 86400,
+    "memory_footprint_mb": 4.2,
+    "modules_loaded": 9
+  },
+  "payload_routing": [
+    { "route": "api/recon", "protocol": "https", "secure": true, "retry": 3 },
+    { "route": "api/telemetry", "protocol": "wss", "secure": true, "retry": 5 }
+  ],
+  "flags": { "zero_bloat": true, "telemetry_quarantine": false }
+}</textarea>
+            <div class="btn-group" style="margin-top:8px;">
+              <button class="btn" onclick="formatJsonM9(2)">Format (2 SP)</button>
+              <button class="btn" onclick="formatJsonM9(4)">Format (4 SP)</button>
+              <button class="btn" onclick="minifyJsonM9()">Minify</button>
+              <button class="btn" onclick="loadJsonPresetM9('telemetry')">Preset: Telemetry</button>
+              <button class="btn" onclick="loadJsonPresetM9('nested')">Preset: Grid</button>
+              <button class="btn" onclick="loadJsonPresetM9('manifest')">Preset: Manifest</button>
+            </div>
+            <div style="margin-top:8px;" class="hud-metrics">
+              <div>SIZE: <span id="m9-metric-size">0 B</span></div>
+              <div>MAX DEPTH: <span id="m9-metric-depth">0</span></div>
+              <div>KEYS/ITEMS: <span id="m9-metric-keys">0</span></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="output-label">COLLAPSIBLE AST / TREE INSPECTOR</div>
+            <div id="json-tree-container" class="output-block" style="min-height:220px; max-height:360px; overflow-y:auto; font-size:12px; line-height:1.6;">
+              <div style="color:var(--text-muted); padding:10px;">// ENTER JSON PAYLOAD TO INSPECT</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer>
@@ -568,6 +621,7 @@
   </footer>
 
   <script src="module-08-regex-matrix.js"></script>
+  <script src="module-09-json-lens.js"></script>
   <script>
     // TAB CONTROLLER
     function switchTab(modId) {
@@ -576,7 +630,7 @@
       const target = document.getElementById(modId);
       if (target) target.classList.add('active');
       
-      const idx = ['m1','m2','m3','m4','m5','m6','m7','m8'].indexOf(modId);
+      const idx = ['m1','m2','m3','m4','m5','m6','m7','m8','m9'].indexOf(modId);
       if (idx !== -1 && document.querySelectorAll('.nav-btn')[idx]) {
         document.querySelectorAll('.nav-btn')[idx].classList.add('active');
       }
@@ -853,6 +907,9 @@
       initModule07();
       if (typeof initModule08 === 'function') {
         initModule08();
+      }
+      if (typeof initModule09 === 'function') {
+        initModule09();
       }
     });
   </script>
