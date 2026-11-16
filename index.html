@@ -250,7 +250,7 @@
       <span class="brand-title">TACTICAL TERMINAL</span>
     </div>
     <div class="hud-metrics">
-      <div>SUITE: <span>10/10 ONLINE</span></div>
+      <div>SUITE: <span>11/11 ONLINE</span></div>
       <div>CORE: <span>ZERO-BLOAT</span></div>
       <div>SEC: <span>ISOLATED</span></div>
     </div>
@@ -267,6 +267,7 @@
     <button class="nav-btn" onclick="switchTab('m8')"><span>08</span> REGEX MATRIX <span class="badge">PARSER</span></button>
     <button class="nav-btn" onclick="switchTab('m9')"><span>09</span> JSON LENS <span class="badge">TREE</span></button>
     <button class="nav-btn" onclick="switchTab('m10')"><span>10</span> URL MATRIX <span class="badge">URI</span></button>
+    <button class="nav-btn" onclick="switchTab('m11')"><span>11</span> JWT CODEC <span class="badge">AUTH</span></button>
   </nav>
 
   <main>
@@ -709,6 +710,66 @@
         </div>
       </div>
     </section>
+
+    <!-- MODULE 11 -->
+    <section id="m11" class="module-view">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">MODULE 11 // TACTICAL JWT &amp; BEARER TOKEN INSPECTOR</div>
+          <div id="m11-status-badge" style="font-size:10px; color:var(--text-muted);">STANDBY</div>
+        </div>
+
+        <div>
+          <div class="output-label">RAW ENCODED JSON WEB TOKEN (JWT)</div>
+          <textarea id="jwt-token-input" placeholder="Paste eyJhbGci... token here..." style="min-height:85px;">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwaWxvdC0wOS1hcmFiZWxsYSIsInJvbGUiOiJvcGVyYXRvciIsInNjb3BlIjpbInRlbGVtZXRyeTpyZWFkIiwidGVybWluYWw6ZXhlY3V0ZSIsInJlY29uOmRlcGxveSJdLCJpYXQiOjE3NjMyNjAwMDAsImV4cCI6MjA3ODg5NjAwMCwiaXNzIjoiYXJhYmVsbGFuaW5lLWF1dGgtaHViIn0.0eF92_qQ4A1tL5-XpZ90b2Nm11cK49A2dE9F10xZ_40</textarea>
+          <div class="btn-group" style="margin-top:8px;">
+            <button class="btn" onclick="loadJwtPresetM11('active')">Preset: Active Token</button>
+            <button class="btn" onclick="loadJwtPresetM11('expired')">Preset: Expired Token</button>
+            <button class="btn" onclick="loadJwtPresetM11('claims')">Preset: Deep Claims</button>
+          </div>
+          <div style="margin-top:8px;" class="hud-metrics">
+            <div>ALGORITHM: <span id="m11-metric-alg">HS256</span></div>
+            <div>TYPE: <span id="m11-metric-typ">JWT</span></div>
+            <div>CLAIMS COUNT: <span id="m11-metric-claims">6</span></div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;" class="grid-2">
+          <div>
+            <div class="output-label" style="display:flex; justify-content:space-between;">
+              <span>HEADER (JOSE METADATA)</span>
+              <span style="cursor:pointer; color:var(--accent-blue);" onclick="copyJwtSegment('header')">[COPY JSON]</span>
+            </div>
+            <div id="jwt-header-out" class="output-block" style="min-height:110px; white-space:pre-wrap; font-size:12px; color:var(--accent-blue);">// AWAITING TOKEN</div>
+          </div>
+
+          <div>
+            <div class="output-label" style="display:flex; justify-content:space-between;">
+              <span>SIGNATURE VERIFICATION MATRIX</span>
+              <span style="cursor:pointer; color:var(--accent-blue);" onclick="copyJwtSegment('sig')">[COPY SIG]</span>
+            </div>
+            <div id="jwt-signature-out" class="output-block" style="min-height:110px; word-break:break-all; font-size:11px; color:var(--accent-amber);">--</div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;" class="grid-2">
+          <div>
+            <div class="output-label" style="display:flex; justify-content:space-between;">
+              <span>PAYLOAD (CLAIMS &amp; ENTITIES)</span>
+              <span style="cursor:pointer; color:var(--accent-blue);" onclick="copyJwtSegment('payload')">[COPY JSON]</span>
+            </div>
+            <div id="jwt-payload-out" class="output-block" style="min-height:180px; max-height:280px; overflow-y:auto; white-space:pre-wrap; font-size:12px; color:var(--accent-green);">// AWAITING TOKEN</div>
+          </div>
+
+          <div>
+            <div class="output-label">TEMPORAL VALIDATION &amp; LIFECYCLE (UTC)</div>
+            <div id="jwt-exp-status" class="output-block" style="min-height:180px; max-height:280px; overflow-y:auto; font-size:12px; line-height:1.8;">
+              --
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer>
@@ -719,6 +780,7 @@
   <script src="module-08-regex-matrix.js"></script>
   <script src="module-09-json-lens.js"></script>
   <script src="module-10-url-matrix.js"></script>
+  <script src="module-11-jwt-inspector.js"></script>
   <script>
     // TAB CONTROLLER
     function switchTab(modId) {
@@ -727,7 +789,7 @@
       const target = document.getElementById(modId);
       if (target) target.classList.add('active');
       
-      const idx = ['m1','m2','m3','m4','m5','m6','m7','m8','m9','m10'].indexOf(modId);
+      const idx = ['m1','m2','m3','m4','m5','m6','m7','m8','m9','m10','m11'].indexOf(modId);
       if (idx !== -1 && document.querySelectorAll('.nav-btn')[idx]) {
         document.querySelectorAll('.nav-btn')[idx].classList.add('active');
       }
@@ -1010,6 +1072,9 @@
       }
       if (typeof initModule10 === 'function') {
         initModule10();
+      }
+      if (typeof initModule11 === 'function') {
+        initModule11();
       }
     });
   </script>
