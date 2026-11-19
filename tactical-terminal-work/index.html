@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TACTICAL TERMINAL // ARABELLANINE</title>
+  <style>
+    :root {
+      --bg: #090a0f;
+      --panel-bg: rgba(16, 18, 27, 0.9);
+      --border-color: #2a2f42;
+      --border-bright: #ff3344;
+      --accent-red: #ff3344;
+      --accent-amber: #ffaa00;
+      --accent-green: #00ff88;
+      --accent-blue: #00ccff;
+      --text-main: #d0d7de;
+      --text-muted: #6e7681;
+      --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-image: 
+        linear-gradient(rgba(255, 51, 68, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 51, 68, 0.03) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+
+    /* TOP HUD */
+    header {
+      border-bottom: 2px solid var(--border-color);
+      background: var(--panel-bg);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-tag {
+      background: var(--accent-red);
+      color: #000;
+      font-weight: 900;
+      padding: 2px 6px;
+      letter-spacing: 1px;
+      font-size: 11px;
+    }
+    .brand-title {
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #fff;
+    }
+    .hud-metrics {
+      display: flex;
+      gap: 16px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .hud-metrics span { color: var(--accent-amber); }
+
+    /* NAVIGATION TABS */
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      background: #0d0f17;
+      border-bottom: 1px solid var(--border-color);
+      padding: 4px 12px 0 12px;
+      gap: 4px;
+    }
+    .nav-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      border-bottom: none;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 6px 14px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .nav-btn:hover {
+      color: var(--text-main);
+      background: rgba(255,255,255,0.02);
+    }
+    .nav-btn.active {
+      color: var(--accent-red);
+      border-color: var(--border-color);
+      border-top: 2px solid var(--accent-red);
+      background: var(--panel-bg);
+      font-weight: bold;
+    }
+    .nav-btn .badge {
+      font-size: 9px;
+      background: #1a1e2e;
+      padding: 1px 4px;
+      border-radius: 2px;
+      color: var(--text-muted);
+    }
+    .nav-btn.active .badge {
+      background: rgba(255,51,68,0.2);
+      color: var(--accent-red);
+    }
+
+    /* MAIN CONTAINER */
+    main {
+      flex: 1;
+      padding: 16px;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .module-view {
+      display: none;
+      animation: fadeIn 0.15s ease-in-out;
+    }
+    .module-view.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(2px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* CARDS & PANELS */
+    .card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      padding: 16px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .card-title {
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      color: var(--accent-amber);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* FORMS & INPUTS */
+    textarea, input, select {
+      width: 100%;
+      background: #06070a;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 8px 10px;
+      outline: none;
+      transition: border 0.15s ease;
+    }
+    textarea:focus, input:focus, select:focus {
+      border-color: var(--accent-red);
+    }
+    textarea { resize: vertical; min-height: 80px; }
+
+    .btn {
+      background: #141722;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 6px 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      background: var(--accent-red);
+      color: #000;
+      border-color: var(--accent-red);
+    }
+    .btn-group { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .grid-5 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+
+    .output-block {
+      background: #050608;
+      border: 1px solid var(--border-color);
+      padding: 10px;
+      font-family: var(--font-mono);
+      word-break: break-all;
+      user-select: all;
+    }
+
+    .output-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+    .output-val {
+      color: var(--accent-green);
+      font-size: 13px;
+    }
+
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+      background: #07080c;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <span class="brand-tag">SYS//ARABELLA</span>
+      <span class="brand-title">TACTICAL TERMINAL</span>
+    </div>
+    <div class="hud-metrics">
+      <div>SUITE: <span>11/11 ONLINE</span></div>
+      <div>CORE: <span>ZERO-BLOAT</span></div>
+      <div>SEC: <span>ISOLATED</span></div>
+    </div>
+  </header>
+
+  <nav>
+    <button class="nav-btn active" onclick="switchTab('m1')"><span>01</span> HEX/ASCII <span class="badge">RAW</span></button>
+    <button class="nav-btn" onclick="switchTab('m2')"><span>02</span> BITWISE <span class="badge">OP</span></button>
+    <button class="nav-btn" onclick="switchTab('m3')"><span>03</span> EPOCH/TIME <span class="badge">UTC</span></button>
+    <button class="nav-btn" onclick="switchTab('m4')"><span>04</span> ENTROPY <span class="badge">RNG</span></button>
+    <button class="nav-btn" onclick="switchTab('m5')"><span>05</span> SUBNET <span class="badge">CIDR</span></button>
+    <button class="nav-btn" onclick="switchTab('m6')"><span>06</span> RADIX CONV <span class="badge">MATH</span></button>
+    <button class="nav-btn" onclick="switchTab('m7')"><span>07</span> HASH DIGEST <span class="badge">CRYPTO</span></button>
+    <button class="nav-btn" onclick="switchTab('m8')"><span>08</span> REGEX MATRIX <span class="badge">PARSER</span></button>
+    <button class="nav-btn" onclick="switchTab('m9')"><span>09</span> JSON LENS <span class="badge">TREE</span></button>
+    <button class="nav-btn" onclick="switchTab('m10')"><span>10</span> URL MATRIX <span class="badge">URI</span></button>
+    <button class="nav-btn" onclick="switchTab('m11')"><span>11</span> JWT CODEC <span class="badge">AUTH</span></button>
+  </nav>
+
+  <main>
+    <!-- MODULE 01 -->
+    <section id="m1" class="module-view active">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">MODULE 01 // HEX / BASE64 / ASCII DUMP</div>
+        </div>
+        <textarea id="m1-in" placeholder="Enter ASCII or Hex string...">TACTICAL TERMINAL READY</textarea>
+        <div class="btn-group">
+          <button class="btn" onclick="runM1('asciiToHex')">To Hex</button>
+          <button class="btn" onclick="runM1('hexToAscii')">Hex To ASCII</button>
+          <button class="btn" onclick="runM1('toB64')">To Base64</button>
+          <button class="btn" onclick="runM1('fromB64')">From Base64</button>
+        </div>
+        <div style="margin-top:12px;" class="output-block">
+          <div class="output-label">OUTPUT BUFFER</div>
+          <div id="m1-out" class="output-val">544143544943414c205445524d494e414c205245414459</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULE 02 -->
+    <section id="m2" class="module-view">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">MODULE 02 // BITWISE OPERATIONS (32-BIT)</div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <div class="output-label">OPERAND A (INT/HEX)</div>
+            <input id="m2-a" value="0x0F0F">
+          </div>
+          <div>
+            <div class="output-label">OPERAND B (INT/HEX)</div>
+            <input id="m2-b" value="0x00FF">
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn" onclick="runM2('AND')">AND (&amp;)</button>
+          <button class="btn" onclick="runM2('OR')">OR (|)</button>
+          <button class="btn" onclick="runM2('XOR')">XOR (^)</button>
+          <button class="btn" onclick="runM2('NOT_A')">NOT A (~)</button>
+          <button class="btn" onclick="runM2('SHL')">A &lt;&lt; 1</button>
+          <button class="btn" onclick="runM2('SHR')">A &gt;&gt; 1</button>
+        </div>
+        <div style="margin-top:12px;" class="output-block">
+          <div class="output-label">BITWISE RESULT</div>
+          <div id="m2-out" class="output-val">BIN: 00000000000000000000000000001111 | HEX: 0x000F | DEC: 15</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULE 03 -->
+    <section id="m3" class="module-view">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">MODULE 03 // EPOCH TIMESTAMP &amp; TEMPORAL CONVERTER</div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <div class="output-label">UNIX TIMESTAMP (SECONDS OR MS)</div>
+            <input id="m3-ts" placeholder="Current or enter epoch...">
+            <div class="btn-group">
+              <button class="btn" onclick="setM3Now()">Now</button>
+              <button class="btn" onclick="parseM3()">Convert Epoch</button>
+            </div>
+          </div>
+          <div>
+            <div class="output-label">HUMAN UTC / ISO OUTPUT</div>
+            <div class="output-block" style="min-height:76px;">
+              <div id="m3-utc" class="output-val">--</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULE 04 -->
+    <section id="m4" class="module-view">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">MODULE 04 // CRYPTOGRAPHIC ENTROPY &amp; KEY GENERATOR</div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <div class="output-label">LENGTH (BYTES)</div>
+            <input id="m4-len" type="number" value="32" min="4" max="512">
+            <div class="btn-group">
+              <button class="btn" onclick="genEntropy('hex')">Generate Hex</button>
+              <button class="btn" onclick="genEntropy('b64')">Generate Base64</button>
+              <button class="btn" onclick="genEntropy('uuid')">UUID v4</button>
+            </div>
+          </div>
+          <div>
+            <div class="output-label">ENTROPY OUTPUT BUFFER</div>
+            <div class="output-block" style="min-height:76px;">
+              <div id="m4-out" class="output-val">--</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULE 05 -->
+    <section id="m5" class="module-view">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">MODULE 05 // IPv4 SUBNET &amp; CIDR MATRIX CALCULATOR</div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <div class="output-label">IP / CIDR PREFIX</div>
+            <input id="m5-cidr" value="192.168.1.1/24">
+            <div class="btn-group">
+              <button class="btn" onclick="calcSubnet()">Calculate Matrix</button>
+            </div>
+          </div>
+          <div>
+            <div class="output-label">CALCULATED METRICS</div>
+            <div class="output-block" id="m5-out">
+              <div>NETMASK: <span class="output-val" id="m5-mask">--</span></div>
+              <div>NETWORK: <span class="output-val" id="m5-net">--</span></div>
+              <div>BROADCAST: <span class="output-val" id="m5-bcast">--</span></div>
+              <div>USABLE HOSTS: <span class="output-val" id="m5-hosts">--</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULE 06 -->
+    <section id="m6" class="module-view">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">MODULE 06 // TACTICAL RADIX &amp; BASE CONVERTER</div>
+          <div id="m6-status-badge" style="font-size:10px; color:var(--text-muted);">READY</div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <div class="output-label">INPUT INTEGER VALUE</div>
+            <input id="radix-input-a" value="255" placeholder="Enter number...">
+          </div>
+          <div>
+            <div class="output-label">INPUT RADIX / BASE</div>
+            <select id="radix-base-a">
+              <option value="10" selected>Decimal (Base 10)</option>
+              <option value="16">Hexadecimal (Base 16)</option>
+              <option value="2">Binary (Base 2)</option>
+              <option value="8">Octal (Base 8)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;" class="grid-4">
+          <div class="output-block">
+            <div class="output-label">BINARY (BASE 2)</div>
+            <div id="radix-out-bin" class="output-val">11111111</div>
+          </div>
+          <div class="output-block">
+            <div class="output-label">OCTAL (BASE 8)</div>
+            <div id="radix-out-oct" class="output-val">377</div>
+          </div>
+          <div class="output-block">
+            <div class="output-label">DECIMAL (BASE 10)</div>
+            <div id="radix-out-dec" class="output-val">255</div>
+          </div>
+          <div class="output-block">
+            <div class="output-label">HEXADECIMAL (BASE 16)</div>
+            <div id="radix-out-hex" class="output-val">FF</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULE 07 -->
+    <section id="m7" class="module-view">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">MODULE 07 // TACTICAL HASH DIGEST (SHA-1 / 256 / 384 / 512)</div>
+          <div id="m7-status-badge" style="font-size:10px; color:var(--accent-green);">DIGEST READY</div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <div class="output-label">INPUT PAYLOAD / TEXT</div>
+            <textarea id="hash-input" placeholder="Type data to hash...">TACTICAL TERMINAL // ARABELLANINE</textarea>
+          </div>
+          <div>
+            <div class="output-label">INPUT ENCODING &amp; HMAC MODE</div>
+            <select id="hash-input-format">
+              <option value="utf8" selected>UTF-8 String</option>
+              <option value="hex">Raw Hex Bytes</option>
+            </select>
+            <div style="margin-top:10px; display:flex; align-items:center; gap:8px;">
+              <input type="checkbox" id="hash-hmac-toggle" style="width:auto;" onchange="toggleHmacMode()">
+              <label for="hash-hmac-toggle" style="font-size:11px; cursor:pointer;">Enable HMAC Key Signature</label>
+            </div>
+            <div id="hmac-key-row" style="display:none; margin-top:8px;">
+              <input id="hash-hmac-key" placeholder="Enter HMAC secret key...">
+            </div>
+            <div style="margin-top:12px;" class="hud-metrics">
+              <div>BYTES: <span id="m7-metric-bytes">34</span></div>
+              <div>BITS: <span id="m7-metric-bits">272</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px; display:flex; flex-direction:column; gap:8px;">
+          <div class="output-block">
+            <div class="output-label" style="display:flex; justify-content:space-between;">
+              <span>SHA-256 (STANDARD SECURE DIGEST)</span>
+              <span style="cursor:pointer; color:var(--accent-blue);" onclick="copyHashResult('sha256')">[COPY]</span>
+            </div>
+            <div id="hash-sha256-out" class="output-val" style="font-size:12px;">--</div>
+          </div>
+          <div class="output-block">
+            <div class="output-label" style="display:flex; justify-content:space-between;">
+              <span>SHA-512 (HIGH STRENGTH DIGEST)</span>
+              <span style="cursor:pointer; color:var(--accent-blue);" onclick="copyHashResult('sha512')">[COPY]</span>
+            </div>
+            <div id="hash-sha512-out" class="output-val" style="font-size:11px;">--</div>
+          </div>
+          <div class="output-block">
+            <div class="output-label" style="display:flex; justify-content:space-between;">
+              <span>SHA-384</span>
+              <span style="cursor:pointer; color:var(--accent-blue);" onclick="copyHashResult('sha384')">[COPY]</span>
+            </div>
+            <div id="hash-sha384-out" class="output-val" style="font-size:12px;">--</div>
+          </div>
+          <div class="output-block">
+            <div class="output-label" style="display:flex; justify-content:space-between;">
+              <span>SHA-1 (LEGACY CHECK)</span>
+              <span style="cursor:pointer; color:var(--accent-blue);" onclick="copyHashResult('sha1')">[COPY]</span>
+            </div>
+            <div id="hash-sha1-out" class="output-val" style="font-size:12px;">--</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULE 08 -->
+    <section id="m8" class="module-view">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">MODULE 08 // TACTICAL REGEX MATRIX &amp; CAPTURE INSPECTOR</div>
+          <div id="m8-status-badge" style="font-size:10px; color:var(--text-muted);">INITIALIZING</div>
+        </div>
+        
+        <div class="grid-2">
+          <div>
+            <div class="output-label">REGULAR EXPRESSION PATTERN</div>
+            <input id="regex-pattern" value="(?<proto>https?)://(?<domain>[a-zA-Z0-9.-]+)(?<path>/[^\s]*)?" placeholder="Enter regex pattern...">
+            
+            <div style="margin-top:10px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; background:#06070a; border:1px solid var(--border-color); padding:6px 10px;">
+              <span style="font-size:10px; color:var(--accent-amber); font-weight:bold;">FLAGS:</span>
+              <label style="font-size:11px; display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" id="regex-flag-g" checked style="width:auto;"> g (global)</label>
+              <label style="font-size:11px; display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" id="regex-flag-i" checked style="width:auto;"> i (case-ins)</label>
+              <label style="font-size:11px; display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" id="regex-flag-m" checked style="width:auto;"> m (multiline)</label>
+              <label style="font-size:11px; display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" id="regex-flag-s" style="width:auto;"> s (dotAll)</label>
+              <label style="font-size:11px; display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" id="regex-flag-u" style="width:auto;"> u (unicode)</label>
+            </div>
+
+            <div class="btn-group" style="margin-top:10px;">
+              <span style="font-size:10px; color:var(--text-muted); align-self:center; margin-right:4px;">PRESETS:</span>
+              <button class="btn" onclick="loadRegexPreset('ipv4')">IPv4</button>
+              <button class="btn" onclick="loadRegexPreset('email')">Email</button>
+              <button class="btn" onclick="loadRegexPreset('jwt')">JWT</button>
+              <button class="btn" onclick="loadRegexPreset('groups')">Telemetry</button>
+            </div>
+          </div>
+
+          <div>
+            <div class="output-label">TEST PAYLOAD BUFFER</div>
+            <textarea id="regex-test-text" placeholder="Enter target text string to evaluate..." style="min-height:92px;">Tactical terminal telemetry online at https://arabellanine.github.io/tactical-terminal/index.html with backup relay at http://192.168.1.1/api/v1/recon.</textarea>
+            <div style="margin-top:8px;" class="hud-metrics">
+              <div>MATCHES: <span id="m8-metric-matches">0</span></div>
+              <div>EXEC TIME: <span id="m8-metric-time">0.00ms</span></div>
+              <div>NATIVE: <span>RegExp API</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;" class="grid-2">
+          <div>
+            <div class="output-label">LIVE MATCH HIGHLIGHT BUFFER</div>
+            <div id="regex-highlight-view" class="output-block" style="min-height:120px; white-space:pre-wrap; line-height:1.6; font-size:12px;">--</div>
+          </div>
+          <div>
+            <div class="output-label">EXTRACTED CAPTURE GROUPS &amp; TOKENS</div>
+            <div id="regex-groups-list" class="output-block" style="min-height:120px; max-height:240px; overflow-y:auto; font-family:var(--font-mono);">
+              <div style="color:var(--text-muted); font-size:11px;">// AWAITING EVALUATION</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULE 09 -->
+    <section id="m9" class="module-view">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">MODULE 09 // TACTICAL JSON LENS &amp; TREE INSPECTOR</div>
+          <div id="m9-status-badge" style="font-size:10px; color:var(--text-muted);">STANDBY</div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <div class="output-label">JSON PAYLOAD BUFFER</div>
+            <textarea id="json-input" placeholder="Paste or type raw JSON..." style="min-height:140px;">{
+  "system": "TACTICAL_TERMINAL",
+  "version": "0.9.0",
+  "node": "arabellanine-mac",
+  "status": "ACTIVE",
+  "metrics": {
+    "uptime_seconds": 86400,
+    "memory_footprint_mb": 4.2,
+    "modules_loaded": 9
+  },
+  "payload_routing": [
+    { "route": "api/recon", "protocol": "https", "secure": true, "retry": 3 },
+    { "route": "api/telemetry", "protocol": "wss", "secure": true, "retry": 5 }
+  ],
+  "flags": { "zero_bloat": true, "telemetry_quarantine": false }
+}</textarea>
+            <div class="btn-group" style="margin-top:8px;">
+              <button class="btn" onclick="formatJsonM9(2)">Format (2 SP)</button>
+              <button class="btn" onclick="formatJsonM9(4)">Format (4 SP)</button>
+              <button class="btn" onclick="minifyJsonM9()">Minify</button>
+              <button class="btn" onclick="loadJsonPresetM9('telemetry')">Preset: Telemetry</button>
+              <button class="btn" onclick="loadJsonPresetM9('nested')">Preset: Grid</button>
+              <button class="btn" onclick="loadJsonPresetM9('manifest')">Preset: Manifest</button>
+            </div>
+            <div style="margin-top:8px;" class="hud-metrics">
+              <div>SIZE: <span id="m9-metric-size">0 B</span></div>
+              <div>MAX DEPTH: <span id="m9-metric-depth">0</span></div>
+              <div>KEYS/ITEMS: <span id="m9-metric-keys">0</span></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="output-label">COLLAPSIBLE AST / TREE INSPECTOR</div>
+            <div id="json-tree-container" class="output-block" style="min-height:220px; max-height:360px; overflow-y:auto; font-size:12px; line-height:1.6;">
+              <div style="color:var(--text-muted); padding:10px;">// ENTER JSON PAYLOAD TO INSPECT</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULE 10 -->
+    <section id="m10" class="module-view">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">MODULE 10 // TACTICAL URL &amp; QUERY PARAM MATRIX</div>
+          <div id="m10-status-badge" style="font-size:10px; color:var(--text-muted);">STANDBY</div>
+        </div>
+
+        <div>
+          <div class="output-label">TARGET URL / URI BUFFER</div>
+          <input id="url-input" value="https://arabellanine.github.io/tactical-terminal/index.html?node=arabella-mac&amp;mode=stealth&amp;sig=0xdeadbeef&amp;retry=3#sector-09" placeholder="Enter target URL or query string...">
+          <div class="btn-group" style="margin-top:8px;">
+            <button class="btn" onclick="loadUrlPresetM10('telemetry')">Preset: Telemetry</button>
+            <button class="btn" onclick="loadUrlPresetM10('auth')">Preset: OAuth</button>
+            <button class="btn" onclick="loadUrlPresetM10('api')">Preset: REST API</button>
+          </div>
+          <div style="margin-top:8px;" class="hud-metrics">
+            <div>SCHEME: <span id="m10-metric-proto">HTTPS</span></div>
+            <div>HOST: <span id="m10-metric-host">arabellanine.github.io</span></div>
+            <div>PARAMS COUNT: <span id="m10-metric-params">4</span></div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;" class="grid-5">
+          <div class="output-block">
+            <div class="output-label">PROTOCOL</div>
+            <div id="url-comp-proto" class="output-val" style="font-size:12px;">https:</div>
+          </div>
+          <div class="output-block">
+            <div class="output-label">HOSTNAME</div>
+            <div id="url-comp-host" class="output-val" style="font-size:12px;">arabellanine.github.io</div>
+          </div>
+          <div class="output-block">
+            <div class="output-label">PORT</div>
+            <div id="url-comp-port" class="output-val" style="font-size:12px;">(default)</div>
+          </div>
+          <div class="output-block">
+            <div class="output-label">PATHNAME</div>
+            <div id="url-comp-path" class="output-val" style="font-size:12px;">/tactical-terminal/index.html</div>
+          </div>
+          <div class="output-block">
+            <div class="output-label">HASH / FRAGMENT</div>
+            <div id="url-comp-hash" class="output-val" style="font-size:12px;">#sector-09</div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;" class="grid-2">
+          <div>
+            <div class="output-label" style="display:flex; justify-content:space-between;">
+              <span>PARSED QUERY PARAMETERS MATRIX</span>
+              <span style="color:var(--text-muted); font-size:10px;">CLICK DEL OR ADD KEY/VAL</span>
+            </div>
+            <div class="output-block" style="min-height:160px; max-height:260px; overflow-y:auto; padding:0;">
+              <table style="width:100%; border-collapse:collapse; font-size:11px; text-align:left;">
+                <thead>
+                  <tr style="border-bottom:1px solid var(--border-color); background:rgba(255,255,255,0.02); color:var(--text-muted);">
+                    <th style="padding:6px 8px; width:30px;">#</th>
+                    <th style="padding:6px 8px; width:35%;">KEY</th>
+                    <th style="padding:6px 8px;">VALUE</th>
+                    <th style="padding:6px 8px; text-align:right; width:90px;">ACTION</th>
+                  </tr>
+                </thead>
+                <tbody id="url-query-body">
+                  <!-- Injected via module-10-url-matrix.js -->
+                </tbody>
+              </table>
+            </div>
+
+            <div style="margin-top:8px; display:flex; gap:6px;">
+              <input id="url-new-key" placeholder="Key (e.g. token)" style="flex:1;">
+              <input id="url-new-val" placeholder="Value (e.g. 99a1)" style="flex:1;">
+              <button class="btn" onclick="addQueryParamM10()">+ Append Param</button>
+            </div>
+          </div>
+
+          <div>
+            <div class="output-label">STANDALONE URI CODEC (ENCODE / DECODE)</div>
+            <textarea id="url-codec-input" placeholder="Type or paste payload to URL encode or decode..." style="min-height:90px;">Tactical token with spaces &amp; symbols: key=alpha+beta/delta?sig=100%</textarea>
+            <div class="btn-group" style="margin-top:6px;">
+              <button class="btn" onclick="runUrlCodecM10('encode')">encodeURIComponent</button>
+              <button class="btn" onclick="runUrlCodecM10('decode')">decodeURIComponent</button>
+              <button class="btn" onclick="runUrlCodecM10('encodeUri')">encodeURI</button>
+              <button class="btn" onclick="runUrlCodecM10('decodeUri')">decodeURI</button>
+            </div>
+            <div style="margin-top:10px;" class="output-block">
+              <div class="output-label">CODEC OUTPUT BUFFER</div>
+              <div id="url-codec-output" class="output-val" style="font-size:12px;">--</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULE 11 -->
+    <section id="m11" class="module-view">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">MODULE 11 // TACTICAL JWT &amp; BEARER TOKEN INSPECTOR</div>
+          <div id="m11-status-badge" style="font-size:10px; color:var(--text-muted);">STANDBY</div>
+        </div>
+
+        <div>
+          <div class="output-label">RAW ENCODED JSON WEB TOKEN (JWT)</div>
+          <textarea id="jwt-token-input" placeholder="Paste eyJhbGci... token here..." style="min-height:85px;">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwaWxvdC0wOS1hcmFiZWxsYSIsInJvbGUiOiJvcGVyYXRvciIsInNjb3BlIjpbInRlbGVtZXRyeTpyZWFkIiwidGVybWluYWw6ZXhlY3V0ZSIsInJlY29uOmRlcGxveSJdLCJpYXQiOjE3NjMyNjAwMDAsImV4cCI6MjA3ODg5NjAwMCwiaXNzIjoiYXJhYmVsbGFuaW5lLWF1dGgtaHViIn0.0eF92_qQ4A1tL5-XpZ90b2Nm11cK49A2dE9F10xZ_40</textarea>
+          <div class="btn-group" style="margin-top:8px;">
+            <button class="btn" onclick="loadJwtPresetM11('active')">Preset: Active Token</button>
+            <button class="btn" onclick="loadJwtPresetM11('expired')">Preset: Expired Token</button>
+            <button class="btn" onclick="loadJwtPresetM11('claims')">Preset: Deep Claims</button>
+          </div>
+          <div style="margin-top:8px;" class="hud-metrics">
+            <div>ALGORITHM: <span id="m11-metric-alg">HS256</span></div>
+            <div>TYPE: <span id="m11-metric-typ">JWT</span></div>
+            <div>CLAIMS COUNT: <span id="m11-metric-claims">6</span></div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;" class="grid-2">
+          <div>
+            <div class="output-label" style="display:flex; justify-content:space-between;">
+              <span>HEADER (JOSE METADATA)</span>
+              <span style="cursor:pointer; color:var(--accent-blue);" onclick="copyJwtSegment('header')">[COPY JSON]</span>
+            </div>
+            <div id="jwt-header-out" class="output-block" style="min-height:110px; white-space:pre-wrap; font-size:12px; color:var(--accent-blue);">// AWAITING TOKEN</div>
+          </div>
+
+          <div>
+            <div class="output-label" style="display:flex; justify-content:space-between;">
+              <span>SIGNATURE VERIFICATION MATRIX</span>
+              <span style="cursor:pointer; color:var(--accent-blue);" onclick="copyJwtSegment('sig')">[COPY SIG]</span>
+            </div>
+            <div id="jwt-signature-out" class="output-block" style="min-height:110px; word-break:break-all; font-size:11px; color:var(--accent-amber);">--</div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;" class="grid-2">
+          <div>
+            <div class="output-label" style="display:flex; justify-content:space-between;">
+              <span>PAYLOAD (CLAIMS &amp; ENTITIES)</span>
+              <span style="cursor:pointer; color:var(--accent-blue);" onclick="copyJwtSegment('payload')">[COPY JSON]</span>
+            </div>
+            <div id="jwt-payload-out" class="output-block" style="min-height:180px; max-height:280px; overflow-y:auto; white-space:pre-wrap; font-size:12px; color:var(--accent-green);">// AWAITING TOKEN</div>
+          </div>
+
+          <div>
+            <div class="output-label">TEMPORAL VALIDATION &amp; LIFECYCLE (UTC)</div>
+            <div id="jwt-exp-status" class="output-block" style="min-height:180px; max-height:280px; overflow-y:auto; font-size:12px; line-height:1.8;">
+              --
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div>ARABELLANINE TACTICAL SUITE // ZERO-BLOAT CLIENT ARCHITECTURE</div>
+    <div>AUTONOMOUS VIGIL RECON // NOVEMBER 2026</div>
+  </footer>
+
+  <script src="module-08-regex-matrix.js"></script>
+  <script src="module-09-json-lens.js"></script>
+  <script src="module-10-url-matrix.js"></script>
+  <script src="module-11-jwt-inspector.js"></script>
+  <script>
+    // TAB CONTROLLER
+    function switchTab(modId) {
+      document.querySelectorAll('.module-view').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      const target = document.getElementById(modId);
+      if (target) target.classList.add('active');
+      
+      const idx = ['m1','m2','m3','m4','m5','m6','m7','m8','m9','m10','m11'].indexOf(modId);
+      if (idx !== -1 && document.querySelectorAll('.nav-btn')[idx]) {
+        document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+      }
+    }
+
+    // MODULE 01 LOGIC
+    function runM1(type) {
+      const val = document.getElementById('m1-in').value;
+      const out = document.getElementById('m1-out');
+      if (type === 'asciiToHex') {
+        let hex = '';
+        for (let i = 0; i < val.length; i++) {
+          hex += val.charCodeAt(i).toString(16).padStart(2, '0');
+        }
+        out.textContent = hex;
+      } else if (type === 'hexToAscii') {
+        const clean = val.replace(/[^0-9a-fA-F]/g, '');
+        let str = '';
+        for (let i = 0; i < clean.length; i += 2) {
+          str += String.fromCharCode(parseInt(clean.substr(i, 2), 16));
+        }
+        out.textContent = str;
+      } else if (type === 'toB64') {
+        out.textContent = btoa(val);
+      } else if (type === 'fromB64') {
+        try { out.textContent = atob(val); } catch(e) { out.textContent = 'INVALID BASE64'; }
+      }
+    }
+
+    // MODULE 02 LOGIC
+    function parseBig(v) {
+      v = v.trim();
+      if (v.startsWith('0x') || v.startsWith('0X')) return BigInt(v);
+      if (v.startsWith('0b') || v.startsWith('0B')) return BigInt(v);
+      return BigInt(v || 0);
+    }
+    function runM2(op) {
+      try {
+        const a = parseBig(document.getElementById('m2-a').value);
+        const b = parseBig(document.getElementById('m2-b').value);
+        let res;
+        if (op === 'AND') res = a & b;
+        if (op === 'OR') res = a | b;
+        if (op === 'XOR') res = a ^ b;
+        if (op === 'NOT_A') res = ~a & 0xFFFFFFFFn;
+        if (op === 'SHL') res = (a << 1n) & 0xFFFFFFFFn;
+        if (op === 'SHR') res = a >> 1n;
+        const res32 = res & 0xFFFFFFFFn;
+        const bin = res32.toString(2).padStart(32, '0');
+        const hex = '0x' + res32.toString(16).toUpperCase().padStart(8, '0');
+        document.getElementById('m2-out').textContent = `BIN: ${bin} | HEX: ${hex} | DEC: ${res32.toString()}`;
+      } catch(e) {
+        document.getElementById('m2-out').textContent = 'ERROR IN CALCULATION';
+      }
+    }
+
+    // MODULE 03 LOGIC
+    function setM3Now() {
+      const now = Math.floor(Date.now() / 1000);
+      document.getElementById('m3-ts').value = now;
+      parseM3();
+    }
+    function parseM3() {
+      const val = parseInt(document.getElementById('m3-ts').value.trim(), 10);
+      if (isNaN(val)) return;
+      const ms = val > 10000000000 ? val : val * 1000;
+      const d = new Date(ms);
+      document.getElementById('m3-utc').textContent = `UTC: ${d.toUTCString()}\nISO: ${d.toISOString()}`;
+    }
+
+    // MODULE 04 LOGIC
+    function genEntropy(type) {
+      const out = document.getElementById('m4-out');
+      if (type === 'uuid') {
+        out.textContent = crypto.randomUUID();
+        return;
+      }
+      const len = parseInt(document.getElementById('m4-len').value, 10) || 32;
+      const buf = new Uint8Array(len);
+      crypto.getRandomValues(buf);
+      if (type === 'hex') {
+        out.textContent = Array.from(buf).map(b => b.toString(16).padStart(2,'0')).join('');
+      } else {
+        out.textContent = btoa(String.fromCharCode(...buf));
+      }
+    }
+
+    // MODULE 05 LOGIC
+    function calcSubnet() {
+      const cidr = document.getElementById('m5-cidr').value.trim();
+      const parts = cidr.split('/');
+      if (parts.length !== 2) return;
+      const ip = parts[0];
+      const pfx = parseInt(parts[1], 10);
+      if (isNaN(pfx) || pfx < 0 || pfx > 32) return;
+
+      const maskNum = pfx === 0 ? 0 : (~0 << (32 - pfx)) >>> 0;
+      const maskStr = [(maskNum>>>24)&255, (maskNum>>>16)&255, (maskNum>>>8)&255, maskNum&255].join('.');
+      
+      const ipParts = ip.split('.').map(Number);
+      const ipNum = ((ipParts[0]<<24) | (ipParts[1]<<16) | (ipParts[2]<<8) | ipParts[3]) >>> 0;
+      const netNum = (ipNum & maskNum) >>> 0;
+      const netStr = [(netNum>>>24)&255, (netNum>>>16)&255, (netNum>>>8)&255, netNum&255].join('.');
+
+      const bcastNum = (netNum | (~maskNum >>> 0)) >>> 0;
+      const bcastStr = [(bcastNum>>>24)&255, (bcastNum>>>16)&255, (bcastNum>>>8)&255, bcastNum&255].join('.');
+
+      const hosts = pfx >= 31 ? 0 : Math.pow(2, 32 - pfx) - 2;
+
+      document.getElementById('m5-mask').textContent = maskStr;
+      document.getElementById('m5-net').textContent = netStr;
+      document.getElementById('m5-bcast').textContent = bcastStr;
+      document.getElementById('m5-hosts').textContent = hosts.toLocaleString();
+    }
+
+    // MODULE 06 LOGIC
+    function initModule06() {
+      const inputEl = document.getElementById('radix-input-a');
+      const baseEl = document.getElementById('radix-base-a');
+      if (!inputEl || !baseEl) return;
+
+      function update() {
+        const raw = inputEl.value.trim();
+        const base = parseInt(baseEl.value, 10);
+        const outBin = document.getElementById('radix-out-bin');
+        const outOct = document.getElementById('radix-out-oct');
+        const outDec = document.getElementById('radix-out-dec');
+        const outHex = document.getElementById('radix-out-hex');
+        const badge = document.getElementById('m6-status-badge');
+
+        if (!raw) {
+          if (outBin) outBin.textContent = '0';
+          if (outOct) outOct.textContent = '0';
+          if (outDec) outDec.textContent = '0';
+          if (outHex) outHex.textContent = '00';
+          if (badge) { badge.textContent = 'IDLE'; badge.style.color = 'var(--text-muted)'; }
+          return;
+        }
+
+        try {
+          let val;
+          if (base === 16) {
+            val = BigInt('0x' + raw.replace(/^0x/i, ''));
+          } else if (base === 2) {
+            val = BigInt('0b' + raw.replace(/^0b/i, ''));
+          } else if (base === 8) {
+            val = BigInt('0o' + raw.replace(/^0o/i, ''));
+          } else {
+            val = BigInt(raw);
+          }
+
+          if (outBin) outBin.textContent = val.toString(2);
+          if (outOct) outOct.textContent = val.toString(8);
+          if (outDec) outDec.textContent = val.toString(10);
+          if (outHex) outHex.textContent = val.toString(16).toUpperCase();
+          if (badge) { badge.textContent = 'CONVERTED'; badge.style.color = 'var(--accent-green)'; }
+        } catch (err) {
+          if (badge) { badge.textContent = 'INVALID INPUT'; badge.style.color = 'var(--accent-red)'; }
+        }
+      }
+
+      inputEl.addEventListener('input', update);
+      baseEl.addEventListener('change', update);
+      update();
+    }
+
+    // MODULE 07 LOGIC
+    function initModule07() {
+      const inputEl = document.getElementById('hash-input');
+      const formatSel = document.getElementById('hash-input-format');
+      const hmacKeyEl = document.getElementById('hash-hmac-key');
+      const hmacToggle = document.getElementById('hash-hmac-toggle');
+      const statusBadge = document.getElementById('m7-status-badge');
+
+      if (!inputEl) return;
+
+      async function computeHashes() {
+        const rawText = inputEl.value;
+        const format = formatSel ? formatSel.value : 'utf8';
+        const useHmac = hmacToggle ? hmacToggle.checked : false;
+        const hmacKeyText = hmacKeyEl ? hmacKeyEl.value : '';
+
+        let dataBuffer;
+        try {
+          if (format === 'hex') {
+            const cleanHex = rawText.replace(/[^0-9a-fA-F]/g, '');
+            if (cleanHex.length % 2 !== 0) {
+              if (statusBadge) { statusBadge.textContent = 'ODD HEX LENGTH'; statusBadge.style.color = 'var(--accent-amber)'; }
+              return;
+            }
+            const bytes = new Uint8Array(cleanHex.length / 2);
+            for (let i = 0; i < cleanHex.length; i += 2) {
+              bytes[i / 2] = parseInt(cleanHex.substr(i, 2), 16);
+            }
+            dataBuffer = bytes.buffer;
+          } else {
+            dataBuffer = new TextEncoder().encode(rawText).buffer;
+          }
+        } catch (e) {
+          if (statusBadge) { statusBadge.textContent = 'ENCODING ERROR'; statusBadge.style.color = 'var(--accent-red)'; }
+          return;
+        }
+
+        const byteLen = dataBuffer.byteLength;
+        const bitLen = byteLen * 8;
+        const byteLenEl = document.getElementById('m7-metric-bytes');
+        const bitLenEl = document.getElementById('m7-metric-bits');
+        if (byteLenEl) byteLenEl.textContent = byteLen.toString();
+        if (bitLenEl) bitLenEl.textContent = bitLen.toString();
+
+        if (statusBadge) {
+          statusBadge.textContent = useHmac ? 'HMAC ACTIVE' : 'DIGEST READY';
+          statusBadge.style.color = useHmac ? 'var(--accent-amber)' : 'var(--accent-green)';
+        }
+
+        const algorithms = [
+          { id: 'sha1', name: 'SHA-1' },
+          { id: 'sha256', name: 'SHA-256' },
+          { id: 'sha384', name: 'SHA-384' },
+          { id: 'sha512', name: 'SHA-512' }
+        ];
+
+        for (const alg of algorithms) {
+          try {
+            let digestBuffer;
+            if (useHmac && hmacKeyText.length > 0) {
+              const keyBuffer = new TextEncoder().encode(hmacKeyText);
+              const cryptoKey = await crypto.subtle.importKey(
+                'raw', keyBuffer, { name: 'HMAC', hash: { name: alg.name } }, false, ['sign']
+              );
+              digestBuffer = await crypto.subtle.sign('HMAC', cryptoKey, dataBuffer);
+            } else {
+              digestBuffer = await crypto.subtle.digest(alg.name, dataBuffer);
+            }
+
+            const digestArray = Array.from(new Uint8Array(digestBuffer));
+            const hex = digestArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            const outEl = document.getElementById(`hash-${alg.id}-out`);
+            if (outEl) outEl.textContent = hex.toUpperCase();
+          } catch (err) {
+            const outEl = document.getElementById(`hash-${alg.id}-out`);
+            if (outEl) outEl.textContent = 'CRYPTO API ERROR';
+          }
+        }
+      }
+
+      window.copyHashResult = function(algId) {
+        const el = document.getElementById(`hash-${algId}-out`);
+        if (el && el.textContent && !el.textContent.includes('ERROR')) {
+          navigator.clipboard.writeText(el.textContent);
+        }
+      };
+
+      window.toggleHmacMode = function() {
+        const row = document.getElementById('hmac-key-row');
+        if (row && hmacToggle) {
+          row.style.display = hmacToggle.checked ? 'flex' : 'none';
+        }
+        computeHashes();
+      };
+
+      inputEl.addEventListener('input', computeHashes);
+      if (formatSel) formatSel.addEventListener('change', computeHashes);
+      if (hmacKeyEl) hmacKeyEl.addEventListener('input', computeHashes);
+
+      computeHashes();
+    }
+
+    // INIT ON LOAD
+    window.addEventListener('DOMContentLoaded', () => {
+      setM3Now();
+      calcSubnet();
+      initModule06();
+      initModule07();
+      if (typeof initModule08 === 'function') {
+        initModule08();
+      }
+      if (typeof initModule09 === 'function') {
+        initModule09();
+      }
+      if (typeof initModule10 === 'function') {
+        initModule10();
+      }
+      if (typeof initModule11 === 'function') {
+        initModule11();
+      }
+    });
+  </script>
+</body>
+</html>
