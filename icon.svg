@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <radialGradient id="hudGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff3344" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#090a0f" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="cyberRed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff5566"/>
+      <stop offset="100%" stop-color="#ff1122"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="512" height="512" fill="#090a0f"/>
+  <rect width="512" height="512" fill="url(#hudGlow)"/>
+  
+  <!-- Outer Tactical Border & Grid -->
+  <rect x="24" y="24" width="464" height="464" rx="32" fill="none" stroke="#2a2f42" stroke-width="4"/>
+  <rect x="36" y="36" width="440" height="440" rx="24" fill="none" stroke="#ff3344" stroke-width="2" stroke-opacity="0.4" stroke-dasharray="8 8"/>
+  
+  <!-- Corner Reticles -->
+  <path d="M 24 80 L 24 24 L 80 24" fill="none" stroke="#ff3344" stroke-width="6"/>
+  <path d="M 488 80 L 488 24 L 432 24" fill="none" stroke="#ff3344" stroke-width="6"/>
+  <path d="M 24 432 L 24 488 L 80 488" fill="none" stroke="#ff3344" stroke-width="6"/>
+  <path d="M 488 432 L 488 488 L 432 488" fill="none" stroke="#ff3344" stroke-width="6"/>
+  
+  <!-- Central Radar / Tactical Scope -->
+  <circle cx="256" cy="256" r="160" fill="#10121b" stroke="#2a2f42" stroke-width="3"/>
+  <circle cx="256" cy="256" r="120" fill="none" stroke="#ff3344" stroke-width="1.5" stroke-opacity="0.3"/>
+  <circle cx="256" cy="256" r="70" fill="none" stroke="#ffaa00" stroke-width="1" stroke-opacity="0.4" stroke-dasharray="4 4"/>
+  <line x1="256" y1="80" x2="256" y2="432" stroke="#2a2f42" stroke-width="1.5" stroke-dasharray="6 6"/>
+  <line x1="80" y1="256" x2="432" y2="256" stroke="#2a2f42" stroke-width="1.5" stroke-dasharray="6 6"/>
+  
+  <!-- Central Tactical Insignia -->
+  <polygon points="256,150 330,220 300,320 212,320 182,220" fill="none" stroke="url(#cyberRed)" stroke-width="5"/>
+  <circle cx="256" cy="256" r="16" fill="#ff3344"/>
+  
+  <!-- Monogram TACTICAL / ARABELLANINE -->
+  <text x="256" y="380" font-family="'JetBrains Mono', 'Courier New', monospace" font-size="28" font-weight="900" fill="#ffffff" letter-spacing="6" text-anchor="middle">TAC//TERM</text>
+  <text x="256" y="410" font-family="'JetBrains Mono', 'Courier New', monospace" font-size="14" font-weight="700" fill="#ffaa00" letter-spacing="4" text-anchor="middle">SYS::ARABELLA 09</text>
+</svg>
