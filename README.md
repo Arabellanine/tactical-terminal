@@ -8,7 +8,7 @@ Live Deployment: [https://arabellanine.github.io/tactical-terminal/](https://ara
 
 ---
 
-## ⚡ SYSTEM STATUS: 12/12 MODULES ONLINE
+## ⚡ SYSTEM STATUS: 12/12 MODULES ONLINE & PWA AIR-GAPPED
 
 Tactical Terminal is a self-contained, high-density tactical workbench executing entirely inside the browser sandboxed context. It performs client-side data inspection, cryptographic hashing, structural validation, and matrix conversions with zero external requests, zero telemetric trackers, and zero CDN bloat.
 
@@ -28,6 +28,32 @@ Tactical Terminal is a self-contained, high-density tactical workbench executing
 | **10** | `TACTICAL URL MATRIX & QUERY PARAM CODEC` | RFC-3986 parser, origin/protocol/host breakdown, URL encoding/decoding, key-value query parameter table. | URI Protocols |
 | **11** | `TACTICAL JWT CODEC & PAYLOAD FORENSICS` | Base64Url parsing of JOSE headers and claims, expiration (`exp`/`iat`/`nbf`) validation, epoch countdown. | Auth Forensics |
 | **12** | `TACTICAL CSS & UNIT MATRIX CONVERTER` | Fluid typography (`clamp()`) generator, px/rem/em/vw conversion, WCAG contrast analyzer, box-shadow generator. | UI Engineering |
+
+---
+
+## 🛰️ AIR-GAPPED PWA & OFFLINE FIELD PROTOCOLS
+
+Tactical Terminal is fortified with an air-gapped Progressive Web App (PWA) architecture, guaranteeing instant execution in disconnected, isolated, or adverse network conditions.
+
+### 1. Service Worker Caching Pipeline (`sw.js`)
+- **Strategy:** Cache-First asset retrieval (`tactical-terminal-v1-airgap`).
+- **Pre-Cached Footprint:**
+  - `index.html` (Complete monolithic tactical interface & embedded styles)
+  - `manifest.webmanifest` (Web App Manifest standard)
+  - `icon.svg` (Hardware-independent vector tactical HUD icon)
+- **Lifecycle Management:** Automated purge of outdated cache archives on service worker activation (`activate` lifecycle hook). Immediate client assumption (`clients.claim()`).
+- **Telemetry Leak Prevention:** Zero external calls intercepted or routed. If network fetch drops or times out, the service worker returns strictly authenticated local memory assets.
+
+### 2. Web App Manifest Standard (`manifest.webmanifest`)
+- **Display Mode:** `standalone` (Borderless OS chrome window execution).
+- **Theme Color:** `#ff3344` (Arabellanine crimson tactical signature).
+- **Background Color:** `#090a0f` (Tactical deep void).
+- **Icon:** Custom SVG vector icon configured for `any maskable` rendering across mobile and desktop operational systems.
+
+### 3. Field Installation Protocol
+1. **Desktop (Chromium / Safari / Edge):** Click the installation prompt icon in the URL omnibox or invoke **Install Tactical Terminal** from browser preferences to seal as an isolated desktop utility.
+2. **Mobile (iOS Safari / Android Chrome):** Select **Share / Add to Home Screen** (`standalone` mode launches without Safari browser chrome).
+3. **Air-Gap Mode:** Once loaded, disconnect all network interfaces (Airplane mode / Ethernet pull). All 12 modules remain 100% operational in memory.
 
 ---
 
